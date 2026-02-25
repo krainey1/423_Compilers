@@ -115,6 +115,12 @@ void make_token(int category) {
     return IDENT;
 }
 
+([0-9]+"."[0-9]*([eE][+-]?[0-9]+)?)[dD] {
+    make_token(DOUBLELITERAL);
+    yytoken->dval = strtod(yytext, NULL);
+    return DOUBLELITERAL;
+}
+
 
 
 ([0-9]+"."[0-9]*([eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+) {
@@ -123,7 +129,11 @@ void make_token(int category) {
     return REALLITERAL;
 }
 
-
+[0-9]+[lL] {
+    make_token(LONGLITERAL);
+    yytoken->ival = strtol(yytext, NULL, 10);
+    return LONGLITERAL;
+}
 
 [0-9]+ {
     make_token(INTEGERLITERAL);

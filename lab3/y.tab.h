@@ -98,7 +98,5 @@ keywords based on kotlin spec, this seemed like a fine amount for a toy compiler
 #define ARROW 412                       /*->*/
 #define DOUBLE_COLON 413                /*::*/
 
-/* ========== SPECIAL ========== */
-#define NEWLINE 420                     /*\n*/
 
 #endif /* YTAB_H */
