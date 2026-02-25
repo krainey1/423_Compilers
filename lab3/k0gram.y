@@ -90,65 +90,115 @@
 %token ARROW
 %token DOUBLE_COLON
 
+%start program
+
 %%
-declaration:
-	functionDeclaration
-	| assignment
-	;
+
+program:
+    topLevelObject
+;
+
+topLevelObject:
+    functionDeclaration
+;
+
+functionDeclaration:
+    FUN IDENT LPAREN functionValueParameters RPAREN
+    typeConstraints
+    functionBody
+;
+
+functionValueParameters:
+      /* empty */
+    | functionValueParameterList
+;
+
+functionValueParameterList:
+      functionValueParameter
+    | functionValueParameterList COMMA functionValueParameter
+;
+
+functionValueParameter:
+    IDENT COLON type
+;
+
+type:
+    IDENT
+;
+
+typeConstraints:
+    /* empty */
+;
+
+functionBody:
+    block
+;
+
+/* ===== Statements ===== */
 
 statements:
-	statement semis
-	| statement semis statements
-	| SEMICOLON
-	;
-
-semis:
-	SEMICOLON semis
-	| SEMICOLON
-	;
+    statement SEMI
+    | statement SEMI statements
+;
 
 statement:
-	declaration
-	| loopStatement
-	| expression
-	;
+    declaration
+    | loopStatement
+    | expression
+;
+
+declaration:
+    functionDeclaration
+    | assignment
+;
+
+/* ===== Assignment ===== */
 
 assignment:
-	IDENTIFIER ASSIGNMENT expression
-	| IDENTIFIER ADD_ASSIGNMENT expression
-	| IDENTIFIER SUB_ASSIGNMENT expression
-	| arrayIndex ASSIGNMENT expression
-	| arrayIndex ADD_ASSIGNMENT expression
-	| arrayIndex SUB_ASSIGNMENT expression
-	;
+    IDENT ASSIGNMENT expression
+    | IDENT ADD_ASSIGN expression
+    | IDENT SUB_ASSIGN expression
+;
 
-arrayIndex:
-	IDENTIFER LSQUARE INTEGER_LITERAL RSQUARE
-	;
+/* ===== Loop Statements (stubbed for hello world subset) ===== */
 
 loopStatement:
-	forstatement
-	| whileStatement
-	| doWhileStatement
-	;
+    /* empty for now */
+;
 
+/* ===== Expressions ===== */
 
 expression:
-	disjunction
-	;
+    disjunction
+;
 
 disjunction:
-	disjunction DISJ conjunction
-	| conjunction
-	;
+    disjunction OR conjunction
+    | conjunction
+;
 
 conjunction:
-	conjunction CONJ equality
-	| equality
-	;
+    conjunction AND equality
+    | equality
+;
+
+equality:
+    IDENT
+    | STRINGLITERAL
+    | INTEGERLITERAL
+    | equality EQ equality
+;
+
+/* ===== Control Structure Body ===== */
 
 controlStructureBody:
-	block
-	| statement SEMICOLON
-	;
+    block
+    | statement SEMI
+;
+
+/* ===== Block ===== */
+
+block:
+    LCURL statements RCURL
+;
 %%
