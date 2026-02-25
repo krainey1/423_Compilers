@@ -554,7 +554,7 @@ char *yytext;
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "y.tab.h"
+#include "k0gram.tab.h"
 
 int lineno = 1;
 char *current_filename;
@@ -2442,4 +2442,5 @@ void yyfree (void * ptr )
 #define YYTABLES_NAME "yytables"
 
 #line 309 "k0lex.l"
+
 

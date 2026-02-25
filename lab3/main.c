@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
+#include "k0gram.tab.h"
+extern int yylex(void);
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Syntax error: %s\n", s);
+}
+
 
 // token struct
 struct token {
@@ -96,7 +102,6 @@ void free_tokens(struct tokenlist *head) {
 }
 
 
-//mainm gotta call yylex and make a linked list
 int main(int argc, char *argv[]) {
 
     if (argc != 2) {
@@ -112,19 +117,14 @@ int main(int argc, char *argv[]) {
 
     current_filename = argv[1];
 
-    struct tokenlist *head = NULL;
-    struct tokenlist *tail = NULL;
+    int result = yyparse();
 
-    int tok;
-
-    while ((tok = yylex()) != -1) {
-        append_token(&head, &tail);
-    }
-
-    print_tokens(head);
-    free_tokens(head);
+    if (result == 0)
+        printf("Syntax analysis successful.\n");
+    else
+        printf("Syntax error detected.\n");
 
     fclose(yyin);
 
-    return 0;
+    return result;
 }

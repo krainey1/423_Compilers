@@ -1,3 +1,11 @@
+%{
+#include <stdio.h>
+
+int yylex(void);
+void yyerror(const char *s);
+%}
+
+
 //tokens
 %token FUN
 %token VAL
@@ -104,17 +112,16 @@ topLevelObject:
 
 functionDeclaration:
     FUN IDENT LPAREN functionValueParameters RPAREN
-    typeConstraints
-    functionBody
+    block
 ;
 
 functionValueParameters:
-      /* empty */
+    /* empty */
     | functionValueParameterList
 ;
 
 functionValueParameterList:
-      functionValueParameter
+    functionValueParameter
     | functionValueParameterList COMMA functionValueParameter
 ;
 
@@ -137,8 +144,8 @@ functionBody:
 /* ===== Statements ===== */
 
 statements:
-    statement SEMI
-    | statement SEMI statements
+    /* empty */
+    | statements statement SEMI
 ;
 
 statement:
@@ -148,8 +155,8 @@ statement:
 ;
 
 declaration:
-    functionDeclaration
-    | assignment
+    assignment
+    | functionDeclaration
 ;
 
 /* ===== Assignment ===== */
@@ -160,33 +167,19 @@ assignment:
     | IDENT SUB_ASSIGN expression
 ;
 
-/* ===== Loop Statements (stubbed for hello world subset) ===== */
-
-loopStatement:
-    /* empty for now */
-;
-
 /* ===== Expressions ===== */
 
 expression:
-    disjunction
-;
-
-disjunction:
-    disjunction OR conjunction
-    | conjunction
-;
-
-conjunction:
-    conjunction AND equality
-    | equality
-;
-
-equality:
-    IDENT
+    IDENT LPAREN STRINGLITERAL RPAREN
     | STRINGLITERAL
     | INTEGERLITERAL
-    | equality EQ equality
+    | IDENT
+;
+
+/* ===== Loop Statements (stub) ===== */
+
+loopStatement:
+    /* empty */
 ;
 
 /* ===== Control Structure Body ===== */
@@ -201,4 +194,5 @@ controlStructureBody:
 block:
     LCURL statements RCURL
 ;
+
 %%
