@@ -90,5 +90,3 @@
 %token ARROW
 %token DOUBLE_COLON
 
-
-%token NEWLINE
