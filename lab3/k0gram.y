@@ -145,7 +145,7 @@ functionBody:
 
 statements:
     /* empty */
-    | statements statement SEMI
+    | statements statement
 ;
 
 statement:
