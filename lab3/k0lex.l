@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "y.tab.h"
+#include "k0gram.tab.h"
 
 int lineno = 1;
 char *current_filename;
