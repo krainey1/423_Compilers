@@ -1,4 +1,4 @@
-/* ========== KEYWORDS ========== */
+//tokens
 %token FUN
 %token VAL
 %token VAR
@@ -15,7 +15,7 @@
 %token IMPORT
 %token CONST
 
-/* ========== LITERALS ========== */
+//the literals
 %token INTEGERLITERAL
 %token LONGLITERAL
 %token REALLITERAL
@@ -25,10 +25,10 @@
 %token STRINGLITERAL
 %token NULLLITERAL
 
-/* ========== IDENTIFIERS ========== */
+//identifiers 
 %token IDENT
 
-/* ========== ASSIGNMENT OPERATORS ========== */
+//assignments
 %token ASSIGNMENT
 %token ADD_ASSIGN
 %token SUB_ASSIGN
@@ -36,45 +36,45 @@
 %token DIV_ASSIGN
 %token MOD_ASSIGN
 
-/* ========== ARITHMETIC OPERATORS ========== */
+//arithmetic
 %token ADD
 %token SUB
 %token MUL
 %token DIV
 %token MOD
 
-/* ========== INCREMENT/DECREMENT ========== */
+
 %token INCR
 %token DECR
 
-/* ========== COMPARISON OPERATORS ========== */
+
 %token EQ
 %token NEQ
 %token GTE
 %token LTE
 
-/* ========== REFERENTIAL EQUALITY ========== */
+
 %token REF_EQ
 %token REF_NEQ
 
-/* ========== LOGICAL OPERATORS ========== */
+
 %token AND
 %token OR
 %token NOT
 
-/* ========== NULL-SAFE OPERATORS ========== */
+
 %token SAFE_CALL
 %token ELVIS
 %token QUEST
 
-/* ========== RANGE OPERATORS ========== */
+
 %token RANGE
 %token RANGE_UNTIL
 
-/* ========== TYPE CAST ========== */
+
 %token AS
 
-/* ========== DELIMITERS & PUNCTUATION ========== */
+
 %token LPAREN
 %token RPAREN
 %token LCURL
@@ -90,7 +90,5 @@
 %token ARROW
 %token DOUBLE_COLON
 
-/* ========== SPECIAL ========== */
-%token NEWLINE
 
-%%
+%token NEWLINE
