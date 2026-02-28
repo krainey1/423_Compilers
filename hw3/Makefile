@@ -1,43 +1,28 @@
-CC      := gcc
-CFLAGS  := -g -Wall
-LEX     := flex
-YACC    := bison
+CC=gcc
+CFLAGS=-Wall -g
 
-TARGET  := ns
+all: parser
 
-YFILE   := k0gram.y
-LFILE   := k0lex.l
-MAIN    := main.c
+parser: parser.tab.c lex.yy.c main.o tree.o token.o
+	$(CC) $(CFLAGS) -o parser parser.tab.c lex.yy.c main.o tree.o token.o -lfl
 
-Y_C     := k0gram.tab.c
-Y_H     := k0gram.tab.h
-L_C     := k0lex.yy.c
+parser.tab.c parser.tab.h: parser.y
+	bison -d -v parser.y
 
-OBJS    := k0gram.tab.o k0lex.yy.o main.o
+lex.yy.c: k0lex.l parser.tab.h
+	flex k0lex.l
 
-all: $(TARGET)
+main.o: main.c tree.h
+	$(CC) $(CFLAGS) -c main.c
 
-# bison & flex stuff 
-$(Y_C) $(Y_H): $(YFILE)
-	$(YACC) -d -o $(Y_C) $(YFILE)
+tree.o: tree.c tree.h token.h
+	$(CC) $(CFLAGS) -c tree.c
 
-$(L_C): $(LFILE) $(Y_H)
-	$(LEX) -o $(L_C) $(LFILE)
-
-
-k0gram.tab.o: $(Y_C)
-	$(CC) $(CFLAGS) -c $(Y_C) -o $@
-
-k0lex.yy.o: $(L_C)
-	$(CC) $(CFLAGS) -c $(L_C) -o $@
-
-main.o: $(MAIN)
-	$(CC) $(CFLAGS) -c $(MAIN) -o $@
-
-
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -lfl -o $(TARGET)
-
+token.o: token.c token.h
+	$(CC) $(CFLAGS) -c token.c
 
 clean:
-	rm -f $(TARGET) *.o $(Y_C) $(Y_H) $(L_C)
+	rm -f parser *.o parser.tab.c parser.tab.h lex.yy.c parser.output
+
+zip: clean
+	zip -r hw3.zip . -x "*.zip" -x "parser.output" -x "lex.yy.c" -x "parser.tab.c" -x "parser.tab.h"
