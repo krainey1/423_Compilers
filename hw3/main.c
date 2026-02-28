@@ -1,130 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "k0gram.tab.h"
-extern int yylex(void);
+#include "tree.h"
 
-void yyerror(const char *s) {
-    fprintf(stderr, "Syntax error: %s\n", s);
-}
-
-
-// token struct
-struct token {
-   int category;
-   char *text;
-   int lineno;
-   char *filename;
-   int ival;
-   double dval;
-   char *sval;
-};
-
-struct tokenlist {
-   struct token *t;
-   struct tokenlist *next;
-};
-
-//grab from lexer
-extern int yylex(void);
-extern struct token *yytoken;
-extern char *current_filename;
 extern FILE *yyin;
+extern int yyparse(void);
 
+extern int g_lex_errors;     // from lexer
+extern int g_syntax_errors;  // from parser.y
+extern tree_t *g_root;       // from parser.y
 
-//append to linked list
-void append_token(struct tokenlist **head, struct tokenlist **tail) {
-    struct tokenlist *node = malloc(sizeof(struct tokenlist));
-    if (!node) exit(1);
+const char *yyfilename = NULL;
 
-    node->t = yytoken;
-    node->next = NULL;
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    fprintf(stderr, "usage: %s <file.k0>\n", argv[0]);
+    return 1;
+  }
 
-    if (*head == NULL) {
-        *head = node;
-        *tail = node;
-    } else {
-        (*tail)->next = node;
-        *tail = node;
-    }
-}
+  yyfilename = argv[1];
+  yyin = fopen(argv[1], "r");
+  if (!yyin) {
+    perror(argv[1]);
+    return 1;
+  }
 
+  int parse_rc = yyparse();
+  fclose(yyin);
 
-//printing
-void print_tokens(struct tokenlist *head) {
+  if (g_lex_errors > 0) {
+    if (g_root) tree_free(g_root);
+    return 1; // lexical errors
+  }
 
-    printf("Category\tText\t\tLineno\t\tFilename\tIval/Sval\n");
-    printf("-----------------------------------------------------------------\n");
+  if (parse_rc != 0 || g_syntax_errors > 0) {
+    if (g_root) tree_free(g_root);
+    return 2; // syntax errors
+  }
 
-    while (head) {
-
-        struct token *t = head->t;
-
-        printf("%d\t\t%s\t\t%d\t\t%s\t\t",
-               t->category,
-               t->text,
-               t->lineno,
-               t->filename);
-
-        /* Print literal value if applicable */
-        if (t->category == INTEGERLITERAL ||
-            t->category == CHARACTERLITERAL) {
-            printf("%d", t->ival);
-        }
-        else if (t->category == REALLITERAL) {
-            printf("%f", t->dval);
-        }
-        else if (t->category == STRINGLITERAL) {
-            printf("%s", t->sval);
-        }
-
-        printf("\n");
-
-        head = head->next;
-    }
-}
-
-
-//to be good and not have memory leaks :3
-void free_tokens(struct tokenlist *head) {
-
-    while (head) {
-        struct tokenlist *temp = head;
-        struct token *t = head->t;
-
-        if (t->text) free(t->text);
-        if (t->sval) free(t->sval);
-        free(t);
-
-        head = head->next;
-        free(temp);
-    }
-}
-
-
-int main(int argc, char *argv[]) {
-
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <inputfile>\n", argv[0]);
-        exit(1);
-    }
-
-    yyin = fopen(argv[1], "r");
-    if (!yyin) {
-        perror("Cannot open file");
-        exit(1);
-    }
-
-    current_filename = argv[1];
-
-    int result = yyparse();
-
-    if (result == 0)
-        printf("Syntax analysis successful.\n");
-    else
-        printf("Syntax error detected.\n");
-
-    fclose(yyin);
-
-    return result;
+  // Success: print syntax tree
+  tree_print(g_root, 0);
+  tree_free(g_root);
+  return 0;
 }
