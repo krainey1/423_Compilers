@@ -4,7 +4,7 @@ CFLAGS=-Wall -g
 all: parser
 
 parser: k0gram.tab.c lex.yy.c main.o tree.o token.o
-	$(CC) $(CFLAGS) -o parser k0gram.tab.c lex.yy.c main.o tree.o token.o -lfl
+	$(CC) $(CFLAGS) -o parser k0gram.tab.c lex.yy.c main.o tree.o token.o 
 
 k0gram.tab.c k0gram.tab.h: k0gram.y
 	bison -d -v k0gram.y

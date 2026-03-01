@@ -4,12 +4,12 @@
 
 extern FILE *yyin;
 extern int yyparse(void);
+const char *yyfilename = NULL;
 
 extern int g_lex_errors;     // from lexer
 extern int g_syntax_errors;  // from parser.y
 extern tree_t *g_root;       // from parser.y
 
-const char *yyfilename = NULL;
 
 int main(int argc, char **argv) {
   if (argc < 2) {

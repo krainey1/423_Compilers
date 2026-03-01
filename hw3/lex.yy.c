@@ -555,13 +555,19 @@ char *yytext;
 #include <string.h>
 #include <ctype.h>
 #include "k0gram.tab.h"
+#include "token.h"     
+
 
 int lineno = 1;
 char *current_filename;
 
 int comment_depth = 0;
 
-struct token {
+
+int g_lex_errors = 0;
+
+
+struct old_token {
    int category;
    char *text;
    int lineno;
@@ -571,15 +577,15 @@ struct token {
    char *sval;
 };
 
-struct token *yytoken;
-
+struct old_token *yytoken;
 
 
 void lexical_error(const char *msg) {
    fprintf(stderr, "%s:%d: lexical error: %s\n",
-           current_filename, lineno, msg);
-   exit(1);
+           current_filename ? current_filename : "<stdin>", lineno, msg);
+   g_lex_errors++;
 }
+
 
 char *copy_string(const char *s) {
    char *p = malloc(strlen(s)+1);
@@ -588,8 +594,25 @@ char *copy_string(const char *s) {
    return p;
 }
 
+
+static void set_yylval_from_yytoken(int category) {
+   yylval.tok = token_create(category,
+                             (yytoken && yytoken->text) ? yytoken->text : yytext,
+                             lineno);
+}
+
+
+static void free_yytoken(void) {
+   if (!yytoken) return;
+   free(yytoken->text);
+   free(yytoken->sval);
+   free(yytoken);
+   yytoken = NULL;
+}
+
+
 void make_token(int category) {
-   yytoken = malloc(sizeof(struct token));
+   yytoken = malloc(sizeof(struct old_token));
    if (!yytoken) exit(1);
 
    yytoken->category = category;
@@ -600,9 +623,10 @@ void make_token(int category) {
    yytoken->dval = 0.0;
    yytoken->sval = NULL;
 }
-#line 604 "lex.yy.c"
+#line 627 "lex.yy.c"
+#define YY_NO_INPUT 1
 
-#line 606 "lex.yy.c"
+#line 630 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -664,8 +688,6 @@ extern int yywrap ( void );
 #endif
 
 #ifndef YY_NO_UNPUT
-    
-    static void yyunput ( int c, char *buf_ptr  );
     
 #endif
 
@@ -821,12 +843,10 @@ YY_DECL
 		}
 
 	{
-#line 57 "k0lex.l"
+#line 81 "k0lex.l"
 
 
-
-
-#line 830 "lex.yy.c"
+#line 850 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -886,27 +906,27 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 61 "k0lex.l"
+#line 83 "k0lex.l"
 { lineno++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 62 "k0lex.l"
+#line 84 "k0lex.l"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 64 "k0lex.l"
+#line 86 "k0lex.l"
 ;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 65 "k0lex.l"
+#line 87 "k0lex.l"
 ;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 69 "k0lex.l"
+#line 91 "k0lex.l"
 {
     comment_depth = 1;
     BEGIN(COMMENT);
@@ -914,12 +934,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 74 "k0lex.l"
+#line 96 "k0lex.l"
 { comment_depth++; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 76 "k0lex.l"
+#line 98 "k0lex.l"
 {
     comment_depth--;
     if (comment_depth == 0)
@@ -929,199 +949,195 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 82 "k0lex.l"
+#line 104 "k0lex.l"
 { lineno++; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 83 "k0lex.l"
+#line 105 "k0lex.l"
 ;
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 85 "k0lex.l"
+#line 107 "k0lex.l"
 {
     lexical_error("unterminated comment");
+    return 0;
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 91 "k0lex.l"
-{ make_token(FUN); return FUN; }
+#line 114 "k0lex.l"
+{ make_token(FUN);      set_yylval_from_yytoken(FUN);      free_yytoken(); return FUN; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 92 "k0lex.l"
-{ make_token(VAL); return VAL; }
+#line 115 "k0lex.l"
+{ make_token(VAL);      set_yylval_from_yytoken(VAL);      free_yytoken(); return VAL; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 93 "k0lex.l"
-{ make_token(VAR); return VAR; }
+#line 116 "k0lex.l"
+{ make_token(VAR);      set_yylval_from_yytoken(VAR);      free_yytoken(); return VAR; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 94 "k0lex.l"
-{ make_token(IF); return IF; }
+#line 117 "k0lex.l"
+{ make_token(IF);       set_yylval_from_yytoken(IF);       free_yytoken(); return IF; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 95 "k0lex.l"
-{ make_token(ELSE); return ELSE; }
+#line 118 "k0lex.l"
+{ make_token(ELSE);     set_yylval_from_yytoken(ELSE);     free_yytoken(); return ELSE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 96 "k0lex.l"
-{ make_token(WHILE); return WHILE; }
+#line 119 "k0lex.l"
+{ make_token(WHILE);    set_yylval_from_yytoken(WHILE);    free_yytoken(); return WHILE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 97 "k0lex.l"
-{ make_token(FOR); return FOR; }
+#line 120 "k0lex.l"
+{ make_token(FOR);      set_yylval_from_yytoken(FOR);      free_yytoken(); return FOR; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 98 "k0lex.l"
-{ make_token(RETURN); return RETURN; }
+#line 121 "k0lex.l"
+{ make_token(RETURN);   set_yylval_from_yytoken(RETURN);   free_yytoken(); return RETURN; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 99 "k0lex.l"
-{ make_token(BREAK); return BREAK; }
+#line 122 "k0lex.l"
+{ make_token(BREAK);    set_yylval_from_yytoken(BREAK);    free_yytoken(); return BREAK; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 100 "k0lex.l"
-{ make_token(CONTINUE); return CONTINUE; }
+#line 123 "k0lex.l"
+{ make_token(CONTINUE); set_yylval_from_yytoken(CONTINUE); free_yytoken(); return CONTINUE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 101 "k0lex.l"
-{ make_token(WHEN); return WHEN; }
+#line 124 "k0lex.l"
+{ make_token(WHEN);     set_yylval_from_yytoken(WHEN);     free_yytoken(); return WHEN; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 102 "k0lex.l"
-{ make_token(IN); return IN; }
+#line 125 "k0lex.l"
+{ make_token(IN);       set_yylval_from_yytoken(IN);       free_yytoken(); return IN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 103 "k0lex.l"
-{ make_token(DO); return DO; }
+#line 126 "k0lex.l"
+{ make_token(DO);       set_yylval_from_yytoken(DO);       free_yytoken(); return DO; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 104 "k0lex.l"
-{ make_token(IMPORT); return IMPORT; }
+#line 127 "k0lex.l"
+{ make_token(IMPORT);   set_yylval_from_yytoken(IMPORT);   free_yytoken(); return IMPORT; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 105 "k0lex.l"
-{ make_token(CONST); return CONST; }
+#line 128 "k0lex.l"
+{ make_token(CONST);    set_yylval_from_yytoken(CONST);    free_yytoken(); return CONST; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 106 "k0lex.l"
-{ make_token(AS); return AS; }
+#line 129 "k0lex.l"
+{ make_token(AS);       set_yylval_from_yytoken(AS);       free_yytoken(); return AS; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 107 "k0lex.l"
-{ make_token(BOOLEANLITERAL); return BOOLEANLITERAL; }
+#line 131 "k0lex.l"
+{ make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); free_yytoken(); return BOOLEANLITERAL; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 108 "k0lex.l"
-{ make_token(BOOLEANLITERAL); return BOOLEANLITERAL; }
+#line 132 "k0lex.l"
+{ make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); free_yytoken(); return BOOLEANLITERAL; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 109 "k0lex.l"
-{ make_token(NULLLITERAL); return NULLLITERAL; }
+#line 133 "k0lex.l"
+{ make_token(NULLLITERAL);    set_yylval_from_yytoken(NULLLITERAL);    free_yytoken(); return NULLLITERAL; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 113 "k0lex.l"
+#line 137 "k0lex.l"
 {
     make_token(IDENT);
+    set_yylval_from_yytoken(IDENT);
+    free_yytoken();
     return IDENT;
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 118 "k0lex.l"
+#line 146 "k0lex.l"
 {
     make_token(DOUBLELITERAL);
     yytoken->dval = strtod(yytext, NULL);
+    set_yylval_from_yytoken(DOUBLELITERAL);
+    free_yytoken();
     return DOUBLELITERAL;
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 126 "k0lex.l"
+#line 154 "k0lex.l"
 {
     make_token(REALLITERAL);
     yytoken->dval = strtod(yytext, NULL);
+    set_yylval_from_yytoken(REALLITERAL);
+    free_yytoken();
     return REALLITERAL;
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 132 "k0lex.l"
+#line 162 "k0lex.l"
 {
     make_token(LONGLITERAL);
     yytoken->ival = strtol(yytext, NULL, 10);
+    set_yylval_from_yytoken(LONGLITERAL);
+    free_yytoken();
     return LONGLITERAL;
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 138 "k0lex.l"
+#line 170 "k0lex.l"
 {
     make_token(INTEGERLITERAL);
     yytoken->ival = strtol(yytext, NULL, 10);
+    set_yylval_from_yytoken(INTEGERLITERAL);
+    free_yytoken();
     return INTEGERLITERAL;
 }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 146 "k0lex.l"
+#line 180 "k0lex.l"
 {
     make_token(CHARACTERLITERAL);
-
-    char c;
-    if (yytext[1] == '\\') {
-        switch (yytext[2]) {
-            case 'n': c = '\n'; break;
-            case 't': c = '\t'; break;
-            case '\\': c = '\\'; break;
-            case '\'': c = '\''; break;
-            default:
-                lexical_error("invalid character escape");
-        }
-    } else {
-        c = yytext[1];
-    }
-
-    yytoken->ival = c;
+    set_yylval_from_yytoken(CHARACTERLITERAL);
+    free_yytoken();
     return CHARACTERLITERAL;
 }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 167 "k0lex.l"
+#line 187 "k0lex.l"
 {
     lexical_error("unterminated character literal");
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 174 "k0lex.l"
+#line 193 "k0lex.l"
 {
     BEGIN(STRING);
 
     make_token(STRINGLITERAL);
 
-    /* overwrite text with dynamic buffer */
     free(yytoken->text);
     yytoken->text = malloc(2);
     strcpy(yytoken->text, "\"");
@@ -1132,19 +1148,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 188 "k0lex.l"
+#line 206 "k0lex.l"
 {
-    /* append closing quote to raw text */
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+2);
     strcat(yytoken->text, "\"");
 
     BEGIN(INITIAL);
+
+    set_yylval_from_yytoken(STRINGLITERAL);
+    free_yytoken();
     return STRINGLITERAL;
 }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 197 "k0lex.l"
+#line 217 "k0lex.l"
 {
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+3);
     strcat(yytoken->text, "\\n");
@@ -1155,7 +1173,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 205 "k0lex.l"
+#line 225 "k0lex.l"
 {
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+3);
     strcat(yytoken->text, "\\t");
@@ -1166,7 +1184,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 213 "k0lex.l"
+#line 233 "k0lex.l"
 {
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+3);
     strcat(yytoken->text, "\\\\");
@@ -1177,7 +1195,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 221 "k0lex.l"
+#line 241 "k0lex.l"
 {
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+3);
     strcat(yytoken->text, "\\\"");
@@ -1189,14 +1207,15 @@ YY_RULE_SETUP
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 229 "k0lex.l"
+#line 249 "k0lex.l"
 {
     lexical_error("unterminated string literal");
+    BEGIN(INITIAL);
 }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 233 "k0lex.l"
+#line 254 "k0lex.l"
 {
     char temp[2];
     temp[0] = yytext[0];
@@ -1210,235 +1229,237 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case YY_STATE_EOF(STRING):
-#line 245 "k0lex.l"
+#line 266 "k0lex.l"
 {
     lexical_error("unterminated string literal");
+    BEGIN(INITIAL);
+    return 0;
 }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 252 "k0lex.l"
-{ make_token(REF_EQ); return REF_EQ; }
+#line 274 "k0lex.l"
+{ make_token(REF_EQ);       set_yylval_from_yytoken(REF_EQ);       free_yytoken(); return REF_EQ; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 253 "k0lex.l"
-{ make_token(REF_NEQ); return REF_NEQ; }
+#line 275 "k0lex.l"
+{ make_token(REF_NEQ);      set_yylval_from_yytoken(REF_NEQ);      free_yytoken(); return REF_NEQ; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 254 "k0lex.l"
-{ make_token(EQ); return EQ; }
+#line 276 "k0lex.l"
+{ make_token(EQ);           set_yylval_from_yytoken(EQ);           free_yytoken(); return EQ; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 255 "k0lex.l"
-{ make_token(NEQ); return NEQ; }
+#line 277 "k0lex.l"
+{ make_token(NEQ);          set_yylval_from_yytoken(NEQ);          free_yytoken(); return NEQ; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 256 "k0lex.l"
-{ make_token(GTE); return GTE; }
+#line 278 "k0lex.l"
+{ make_token(GTE);          set_yylval_from_yytoken(GTE);          free_yytoken(); return GTE; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 257 "k0lex.l"
-{ make_token(LTE); return LTE; }
+#line 279 "k0lex.l"
+{ make_token(LTE);          set_yylval_from_yytoken(LTE);          free_yytoken(); return LTE; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 258 "k0lex.l"
-{ make_token(RANGE_UNTIL); return RANGE_UNTIL; }
+#line 280 "k0lex.l"
+{ make_token(RANGE_UNTIL);  set_yylval_from_yytoken(RANGE_UNTIL);  free_yytoken(); return RANGE_UNTIL; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 259 "k0lex.l"
-{ make_token(RANGE); return RANGE; }
+#line 281 "k0lex.l"
+{ make_token(RANGE);        set_yylval_from_yytoken(RANGE);        free_yytoken(); return RANGE; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 260 "k0lex.l"
-{ make_token(AND); return AND; }
+#line 282 "k0lex.l"
+{ make_token(AND);          set_yylval_from_yytoken(AND);          free_yytoken(); return AND; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 261 "k0lex.l"
-{ make_token(OR); return OR; }
+#line 283 "k0lex.l"
+{ make_token(OR);           set_yylval_from_yytoken(OR);           free_yytoken(); return OR; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 262 "k0lex.l"
-{ make_token(INCR); return INCR; }
+#line 284 "k0lex.l"
+{ make_token(INCR);         set_yylval_from_yytoken(INCR);         free_yytoken(); return INCR; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 263 "k0lex.l"
-{ make_token(DECR); return DECR; }
+#line 285 "k0lex.l"
+{ make_token(DECR);         set_yylval_from_yytoken(DECR);         free_yytoken(); return DECR; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 264 "k0lex.l"
-{ make_token(ADD_ASSIGN); return ADD_ASSIGN; }
+#line 286 "k0lex.l"
+{ make_token(ADD_ASSIGN);   set_yylval_from_yytoken(ADD_ASSIGN);   free_yytoken(); return ADD_ASSIGN; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 265 "k0lex.l"
-{ make_token(SUB_ASSIGN); return SUB_ASSIGN; }
+#line 287 "k0lex.l"
+{ make_token(SUB_ASSIGN);   set_yylval_from_yytoken(SUB_ASSIGN);   free_yytoken(); return SUB_ASSIGN; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 266 "k0lex.l"
-{ make_token(MUL_ASSIGN); return MUL_ASSIGN; }
+#line 288 "k0lex.l"
+{ make_token(MUL_ASSIGN);   set_yylval_from_yytoken(MUL_ASSIGN);   free_yytoken(); return MUL_ASSIGN; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 267 "k0lex.l"
-{ make_token(DIV_ASSIGN); return DIV_ASSIGN; }
+#line 289 "k0lex.l"
+{ make_token(DIV_ASSIGN);   set_yylval_from_yytoken(DIV_ASSIGN);   free_yytoken(); return DIV_ASSIGN; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 268 "k0lex.l"
-{ make_token(MOD_ASSIGN); return MOD_ASSIGN; }
+#line 290 "k0lex.l"
+{ make_token(MOD_ASSIGN);   set_yylval_from_yytoken(MOD_ASSIGN);   free_yytoken(); return MOD_ASSIGN; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 269 "k0lex.l"
-{ make_token(ARROW); return ARROW; }
+#line 291 "k0lex.l"
+{ make_token(ARROW);        set_yylval_from_yytoken(ARROW);        free_yytoken(); return ARROW; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 270 "k0lex.l"
-{ make_token(DOUBLE_COLON); return DOUBLE_COLON; }
+#line 292 "k0lex.l"
+{ make_token(DOUBLE_COLON); set_yylval_from_yytoken(DOUBLE_COLON); free_yytoken(); return DOUBLE_COLON; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 271 "k0lex.l"
-{ make_token(SAFE_CALL); return SAFE_CALL; }
+#line 293 "k0lex.l"
+{ make_token(SAFE_CALL);    set_yylval_from_yytoken(SAFE_CALL);    free_yytoken(); return SAFE_CALL; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 272 "k0lex.l"
-{ make_token(ELVIS); return ELVIS; }
+#line 294 "k0lex.l"
+{ make_token(ELVIS);        set_yylval_from_yytoken(ELVIS);        free_yytoken(); return ELVIS; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 276 "k0lex.l"
-{ make_token(ADD); return ADD; }
+#line 298 "k0lex.l"
+{ make_token(ADD);        set_yylval_from_yytoken(ADD);        free_yytoken(); return ADD; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 277 "k0lex.l"
-{ make_token(SUB); return SUB; }
+#line 299 "k0lex.l"
+{ make_token(SUB);        set_yylval_from_yytoken(SUB);        free_yytoken(); return SUB; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 278 "k0lex.l"
-{ make_token(MUL); return MUL; }
+#line 300 "k0lex.l"
+{ make_token(MUL);        set_yylval_from_yytoken(MUL);        free_yytoken(); return MUL; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 279 "k0lex.l"
-{ make_token(DIV); return DIV; }
+#line 301 "k0lex.l"
+{ make_token(DIV);        set_yylval_from_yytoken(DIV);        free_yytoken(); return DIV; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 280 "k0lex.l"
-{ make_token(MOD); return MOD; }
+#line 302 "k0lex.l"
+{ make_token(MOD);        set_yylval_from_yytoken(MOD);        free_yytoken(); return MOD; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 281 "k0lex.l"
-{ make_token(ASSIGNMENT); return ASSIGNMENT; }
+#line 303 "k0lex.l"
+{ make_token(ASSIGNMENT); set_yylval_from_yytoken(ASSIGNMENT); free_yytoken(); return ASSIGNMENT; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 282 "k0lex.l"
-{ make_token(NOT); return NOT; }
+#line 304 "k0lex.l"
+{ make_token(NOT);        set_yylval_from_yytoken(NOT);        free_yytoken(); return NOT; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 283 "k0lex.l"
-{ make_token(QUEST); return QUEST; }
+#line 305 "k0lex.l"
+{ make_token(QUEST);      set_yylval_from_yytoken(QUEST);      free_yytoken(); return QUEST; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 284 "k0lex.l"
-{ make_token(SEMI); return SEMI; }
+#line 306 "k0lex.l"
+{ make_token(SEMI);       set_yylval_from_yytoken(SEMI);       free_yytoken(); return SEMI; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 285 "k0lex.l"
-{ make_token(COLON); return COLON; }
+#line 307 "k0lex.l"
+{ make_token(COLON);      set_yylval_from_yytoken(COLON);      free_yytoken(); return COLON; }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 286 "k0lex.l"
-{ make_token(COMMA); return COMMA; }
+#line 308 "k0lex.l"
+{ make_token(COMMA);      set_yylval_from_yytoken(COMMA);      free_yytoken(); return COMMA; }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 287 "k0lex.l"
-{ make_token(DOT); return DOT; }
+#line 309 "k0lex.l"
+{ make_token(DOT);        set_yylval_from_yytoken(DOT);        free_yytoken(); return DOT; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 288 "k0lex.l"
-{ make_token(LPAREN); return LPAREN; }
+#line 310 "k0lex.l"
+{ make_token(LPAREN);     set_yylval_from_yytoken(LPAREN);     free_yytoken(); return LPAREN; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 289 "k0lex.l"
-{ make_token(RPAREN); return RPAREN; }
+#line 311 "k0lex.l"
+{ make_token(RPAREN);     set_yylval_from_yytoken(RPAREN);     free_yytoken(); return RPAREN; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 290 "k0lex.l"
-{ make_token(LCURL); return LCURL; }
+#line 312 "k0lex.l"
+{ make_token(LCURL);      set_yylval_from_yytoken(LCURL);      free_yytoken(); return LCURL; }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 291 "k0lex.l"
-{ make_token(RCURL); return RCURL; }
+#line 313 "k0lex.l"
+{ make_token(RCURL);      set_yylval_from_yytoken(RCURL);      free_yytoken(); return RCURL; }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 292 "k0lex.l"
-{ make_token(LSQUARE); return LSQUARE; }
+#line 314 "k0lex.l"
+{ make_token(LSQUARE);    set_yylval_from_yytoken(LSQUARE);    free_yytoken(); return LSQUARE; }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 293 "k0lex.l"
-{ make_token(RSQUARE); return RSQUARE; }
+#line 315 "k0lex.l"
+{ make_token(RSQUARE);    set_yylval_from_yytoken(RSQUARE);    free_yytoken(); return RSQUARE; }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 294 "k0lex.l"
-{ make_token(LANGLE); return LANGLE; }
+#line 316 "k0lex.l"
+{ make_token(LANGLE);     set_yylval_from_yytoken(LANGLE);     free_yytoken(); return LANGLE; }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 295 "k0lex.l"
-{ make_token(RANGLE); return RANGLE; }
+#line 317 "k0lex.l"
+{ make_token(RANGLE);     set_yylval_from_yytoken(RANGLE);     free_yytoken(); return RANGLE; }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 299 "k0lex.l"
+#line 321 "k0lex.l"
 {
     lexical_error("illegal character");
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 305 "k0lex.l"
+#line 325 "k0lex.l"
 {
-    return -1;
+    return 0;
 }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 309 "k0lex.l"
+#line 329 "k0lex.l"
 ECHO;
 	YY_BREAK
-#line 1442 "lex.yy.c"
+#line 1463 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1771,43 +1792,6 @@ static int yy_get_next_buffer (void)
 }
 
 #ifndef YY_NO_UNPUT
-
-    static void yyunput (int c, char * yy_bp )
-{
-	char *yy_cp;
-    
-    yy_cp = (yy_c_buf_p);
-
-	/* undo effects of setting up yytext */
-	*yy_cp = (yy_hold_char);
-
-	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		int number_to_move = (yy_n_chars) + 2;
-		char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		char *source =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
-
-		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			*--dest = *--source;
-
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
-
-		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
-
-	*--yy_cp = (char) c;
-
-	(yytext_ptr) = yy_bp;
-	(yy_hold_char) = *yy_cp;
-	(yy_c_buf_p) = yy_cp;
-}
 
 #endif
 
@@ -2441,6 +2425,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 309 "k0lex.l"
-
+#line 329 "k0lex.l"
 

@@ -67,14 +67,25 @@
 
 
 /* First part of user prologue.  */
-#line 1 "k0gram.y"
+#line 6 "k0gram.y"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "tree.h"
+#include "token.h"
 
-int yylex(void);
+int  yylex(void);
 void yyerror(const char *s);
 
-#line 78 "k0gram.tab.c"
+extern int   lineno;
+extern char *current_filename;
+
+tree_t *g_root         = NULL;
+extern int g_lex_errors;
+int     g_syntax_errors = 0;
+
+#line 89 "k0gram.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -179,13 +190,20 @@ enum yysymbol_kind_t
   YYSYMBOL_functionValueParameterList = 74, /* functionValueParameterList  */
   YYSYMBOL_functionValueParameter = 75,    /* functionValueParameter  */
   YYSYMBOL_type = 76,                      /* type  */
-  YYSYMBOL_statements = 77,                /* statements  */
-  YYSYMBOL_statement = 78,                 /* statement  */
-  YYSYMBOL_declaration = 79,               /* declaration  */
-  YYSYMBOL_assignment = 80,                /* assignment  */
-  YYSYMBOL_expression = 81,                /* expression  */
-  YYSYMBOL_loopStatement = 82,             /* loopStatement  */
-  YYSYMBOL_block = 83                      /* block  */
+  YYSYMBOL_typeArgumentList = 77,          /* typeArgumentList  */
+  YYSYMBOL_block = 78,                     /* block  */
+  YYSYMBOL_statements = 79,                /* statements  */
+  YYSYMBOL_statement = 80,                 /* statement  */
+  YYSYMBOL_varDeclaration = 81,            /* varDeclaration  */
+  YYSYMBOL_assignment = 82,                /* assignment  */
+  YYSYMBOL_ifStatement = 83,               /* ifStatement  */
+  YYSYMBOL_whileStatement = 84,            /* whileStatement  */
+  YYSYMBOL_forStatement = 85,              /* forStatement  */
+  YYSYMBOL_jumpStatement = 86,             /* jumpStatement  */
+  YYSYMBOL_controlStructureBody = 87,      /* controlStructureBody  */
+  YYSYMBOL_expression = 88,                /* expression  */
+  YYSYMBOL_argumentList = 89,              /* argumentList  */
+  YYSYMBOL_literal = 90                    /* literal  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -302,7 +320,7 @@ typedef int yytype_uint16;
 
 
 /* Stored state numbers (used for stacks). */
-typedef yytype_int8 yy_state_t;
+typedef yytype_uint8 yy_state_t;
 
 /* State numbers in computations.  */
 typedef int yy_state_fast_t;
@@ -513,16 +531,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   55
+#define YYLAST   634
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  69
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  15
+#define YYNNTS  22
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  26
+#define YYNRULES  93
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  41
+#define YYNSTATES  174
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   323
@@ -576,11 +594,18 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
-       0,   106,   106,   110,   114,   118,   120,   124,   125,   129,
-     133,   146,   148,   152,   153,   154,   158,   159,   165,   166,
-     167,   173,   174,   175,   176,   181,   195
+       0,   165,   165,   177,   187,   194,   202,   210,   222,   223,
+     228,   230,   238,   243,   252,   254,   256,   262,   271,   273,
+     285,   298,   299,   322,   323,   324,   325,   326,   327,   328,
+     329,   331,   340,   346,   353,   359,   366,   379,   384,   389,
+     394,   399,   404,   416,   422,   432,   441,   451,   453,   455,
+     457,   462,   463,   472,   474,   476,   481,   486,   491,   496,
+     501,   506,   508,   510,   512,   514,   516,   518,   520,   522,
+     524,   526,   528,   530,   532,   534,   536,   538,   540,   542,
+     544,   546,   548,   550,   555,   557,   570,   571,   572,   573,
+     574,   575,   576,   577
 };
 #endif
 
@@ -609,8 +634,10 @@ static const char *const yytname[] =
   "DOUBLE_COLON", "$accept", "program", "topLevelObject",
   "functionDeclaration", "functionValueParameters",
   "functionValueParameterList", "functionValueParameter", "type",
-  "statements", "statement", "declaration", "assignment", "expression",
-  "loopStatement", "block", YY_NULLPTR
+  "typeArgumentList", "block", "statements", "statement", "varDeclaration",
+  "assignment", "ifStatement", "whileStatement", "forStatement",
+  "jumpStatement", "controlStructureBody", "expression", "argumentList",
+  "literal", YY_NULLPTR
 };
 
 static const char *
@@ -620,7 +647,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-50)
+#define YYPACT_NINF (-158)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -632,13 +659,26 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-static const yytype_int8 yypact[] =
+static const yytype_int16 yypact[] =
 {
-       2,   -17,    11,   -50,   -50,   -42,   -50,   -12,   -49,   -39,
-     -45,   -50,    -7,   -37,   -12,   -50,   -50,   -50,   -50,   -50,
-      -3,   -50,   -50,   -26,   -50,   -50,   -50,   -50,   -50,   -50,
-     -50,   -14,   -14,   -14,    -2,   -31,   -50,   -50,   -50,   -30,
-     -50
+       1,   -15,     9,  -158,  -158,   -40,  -158,     3,   -29,    -2,
+     -18,  -158,    30,    22,     3,   -45,    45,   188,  -158,    30,
+    -158,  -158,  -158,    30,   188,  -158,  -158,  -158,  -158,  -158,
+    -158,  -158,  -158,  -158,   188,   188,   188,   405,  -158,   130,
+     -22,  -158,     8,   405,   570,   108,   245,   188,   188,   188,
+     188,   188,  -158,  -158,   188,   188,   188,   188,   188,   188,
+     188,   188,    31,   188,   188,   188,    30,    43,   188,   188,
+     188,    47,    49,    50,    23,    25,    26,   188,  -158,  -158,
+      -5,  -158,  -158,  -158,  -158,  -158,  -158,  -158,  -158,  -158,
+     211,   188,  -158,    33,    30,  -158,   570,   570,   108,   108,
+     108,   501,   501,   533,   533,   501,   501,   469,   437,  -158,
+     405,   540,   540,  -158,  -158,   405,   -53,   277,   533,   533,
+    -158,    -7,    -6,   188,   188,    56,   405,   188,   188,   188,
+     188,   188,   188,  -158,   405,  -158,  -158,  -158,   188,  -158,
+     188,    30,   188,    30,   309,   341,    71,   405,   405,   405,
+     405,   405,   405,   405,   405,    59,   405,    61,   171,   171,
+     188,   188,   188,  -158,  -158,    82,  -158,   373,   405,   405,
+     171,   171,  -158,  -158
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -646,48 +686,179 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     2,     3,     0,     1,     5,     0,     0,
-       6,     7,     0,     0,     0,    10,     9,    11,     4,     8,
-       0,    23,    22,    24,    26,    17,    12,    13,    16,    15,
-      14,     0,     0,     0,     0,    24,    18,    19,    20,     0,
-      21
+       0,     0,     0,     2,     3,     0,     1,     8,     0,     0,
+       9,    10,     0,     0,     0,    14,    12,     0,    21,     0,
+       4,    11,    15,     0,     0,    86,    87,    88,    89,    90,
+      91,    92,    93,    54,     0,     0,     0,     6,    53,     0,
+       0,    18,     0,    13,    66,    67,     0,     0,     0,     0,
+       0,     0,    68,    69,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    47,    49,    50,
+      54,    20,    24,    22,    23,    29,    25,    26,    27,    28,
+      31,     0,     5,    16,     0,    83,    61,    62,    63,    64,
+      65,    70,    71,    75,    74,    76,    77,    78,    79,    59,
+      82,    80,    81,    60,    55,    84,     0,     0,    72,    73,
+      58,     0,     0,     0,     0,     0,    48,     0,     0,     0,
+       0,     0,     0,    30,     7,    17,    19,    56,     0,    57,
+       0,     0,     0,     0,     0,     0,     0,    37,    38,    39,
+      40,    41,    42,    85,    32,     0,    34,    36,     0,     0,
+       0,     0,     0,    51,    52,    43,    45,     0,    33,    35,
+       0,     0,    44,    46
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
+static const yytype_int16 yypgoto[] =
 {
-     -50,   -50,   -50,     5,   -50,   -50,    13,   -50,   -50,   -50,
-     -50,   -50,   -25,   -50,   -50
+    -158,  -158,  -158,    90,  -158,  -158,    78,   -11,  -158,   -12,
+    -158,    54,  -158,  -158,  -158,  -158,  -158,  -158,  -157,   -17,
+    -158,  -158
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int8 yydefgoto[] =
+static const yytype_uint8 yydefgoto[] =
 {
-       0,     2,     3,     4,     9,    10,    11,    16,    20,    26,
-      27,    28,    29,    30,    18
+       0,     2,     3,    82,     9,    10,    11,    16,    42,   163,
+      39,   164,    84,    85,    86,    87,    88,    89,   165,    90,
+     116,    38
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule whose
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_int8 yytable[] =
+static const yytype_uint8 yytable[] =
 {
-       1,    31,    32,    33,    21,     1,    36,    37,    38,     5,
-      22,     6,    35,     7,     8,    21,    12,    13,    14,    15,
-      17,    22,    39,    23,    34,    25,    40,    19,     0,    34,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,    24
+      37,    20,   166,   137,     1,    91,    22,    43,    40,     6,
+     138,     5,    41,   172,   173,     7,    23,    44,    45,    46,
+     140,   142,   127,   128,   129,   130,   131,   132,    92,     8,
+      96,    97,    98,    99,   100,    18,    12,   101,   102,   103,
+     104,   105,   106,   107,   108,    14,   110,   111,   112,    17,
+     115,   117,   118,   119,    13,   113,    15,   109,   141,   143,
+     126,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      93,    94,    24,   120,   134,   121,   122,    34,   123,    18,
+     124,   125,   146,   136,   135,   160,   161,    19,   162,   170,
+       4,    35,    21,    83,     0,     0,     0,     0,    36,   114,
+       0,     0,     0,     0,     0,     0,   144,   145,     0,     0,
+     147,   148,   149,   150,   151,   152,     0,     0,     0,     0,
+       0,   153,     0,   154,     0,   156,     0,     0,     0,     0,
+     155,     0,   157,     1,    72,    73,    74,     0,    75,    76,
+      77,    78,    79,   167,   168,   169,    52,    53,    25,    26,
+      27,    28,    29,    30,    31,    32,    80,    62,    63,     0,
+       0,     0,    66,    67,    34,     0,     0,    68,     0,     0,
+       0,     0,    71,     0,     1,    72,    73,    74,    35,    75,
+      76,    77,    78,    79,     0,    36,     0,     0,    81,    25,
+      26,    27,    28,    29,    30,    31,    32,    80,     0,     0,
+       0,     0,     0,     0,     0,    34,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,     0,     0,     0,     0,    35,
+       0,     0,    34,     0,     0,     0,    36,     0,    18,     0,
+       0,     0,     0,     0,     0,     0,    35,     0,     0,     0,
+       0,     0,     0,    36,    47,    48,    49,    50,    51,    52,
+      53,    54,    55,    56,    57,    58,    59,    60,    61,     0,
+      62,    63,     0,    64,    65,    66,    67,     0,     0,     0,
+      68,     0,    69,    70,     0,    71,     0,   133,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,     0,    62,    63,     0,    64,    65,    66,
+      67,    95,     0,     0,    68,     0,    69,    70,     0,    71,
+      47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
+      57,    58,    59,    60,    61,     0,    62,    63,     0,    64,
+      65,    66,    67,     0,     0,     0,    68,   139,    69,    70,
+       0,    71,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    59,    60,    61,     0,    62,    63,
+       0,    64,    65,    66,    67,   158,     0,     0,    68,     0,
+      69,    70,     0,    71,    47,    48,    49,    50,    51,    52,
+      53,    54,    55,    56,    57,    58,    59,    60,    61,     0,
+      62,    63,     0,    64,    65,    66,    67,   159,     0,     0,
+      68,     0,    69,    70,     0,    71,    47,    48,    49,    50,
+      51,    52,    53,    54,    55,    56,    57,    58,    59,    60,
+      61,     0,    62,    63,     0,    64,    65,    66,    67,   171,
+       0,     0,    68,     0,    69,    70,     0,    71,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,     0,    62,    63,     0,    64,    65,    66,
+      67,     0,     0,     0,    68,     0,    69,    70,     0,    71,
+      47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
+      57,    58,    59,    60,     0,     0,    62,    63,     0,    64,
+      65,    66,    67,     0,     0,     0,    68,     0,    69,    70,
+       0,    71,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    59,     0,     0,     0,    62,    63,
+       0,    64,    65,    66,    67,     0,     0,     0,    68,     0,
+      69,    70,     0,    71,    47,    48,    49,    50,    51,    52,
+      53,     0,     0,    56,    57,     0,     0,     0,     0,     0,
+      62,    63,     0,    64,    65,    66,    67,     0,     0,     0,
+      68,     0,    69,    70,     0,    71,    47,    48,    49,    50,
+      51,    52,    53,    47,    48,    49,    50,    51,    52,    53,
+       0,     0,    62,    63,     0,    64,    65,    66,    67,    62,
+      63,     0,    68,     0,    66,    67,     0,    71,     0,    68,
+       0,     0,     0,     0,    71,    49,    50,    51,    52,    53,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    62,
+      63,     0,     0,     0,    66,    67,     0,     0,     0,    68,
+       0,     0,     0,     0,    71
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_int16 yycheck[] =
 {
-       3,    27,    28,    29,    18,     3,    31,    32,    33,    26,
-      24,     0,    26,    55,    26,    18,    65,    56,    63,    26,
-      57,    24,    24,    26,    55,    20,    56,    14,    -1,    55,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    58
+      17,    13,   159,    56,     3,    27,    51,    24,    19,     0,
+      63,    26,    23,   170,   171,    55,    61,    34,    35,    36,
+      27,    27,    27,    28,    29,    30,    31,    32,    40,    26,
+      47,    48,    49,    50,    51,    57,    65,    54,    55,    56,
+      57,    58,    59,    60,    61,    63,    63,    64,    65,    27,
+      67,    68,    69,    70,    56,    66,    26,    26,    65,    65,
+      77,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      62,    63,    27,    26,    91,    26,    26,    34,    55,    57,
+      55,    55,    26,    94,    51,    14,    27,    65,    27,     7,
+       0,    48,    14,    39,    -1,    -1,    -1,    -1,    55,    56,
+      -1,    -1,    -1,    -1,    -1,    -1,   123,   124,    -1,    -1,
+     127,   128,   129,   130,   131,   132,    -1,    -1,    -1,    -1,
+      -1,   138,    -1,   140,    -1,   142,    -1,    -1,    -1,    -1,
+     141,    -1,   143,     3,     4,     5,     6,    -1,     8,     9,
+      10,    11,    12,   160,   161,   162,    38,    39,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    49,    50,    -1,
+      -1,    -1,    54,    55,    34,    -1,    -1,    59,    -1,    -1,
+      -1,    -1,    64,    -1,     3,     4,     5,     6,    48,     8,
+       9,    10,    11,    12,    -1,    55,    -1,    -1,    58,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    34,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    -1,    -1,    -1,    -1,    48,
+      -1,    -1,    34,    -1,    -1,    -1,    55,    -1,    57,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    48,    -1,    -1,    -1,
+      -1,    -1,    -1,    55,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    -1,
+      49,    50,    -1,    52,    53,    54,    55,    -1,    -1,    -1,
+      59,    -1,    61,    62,    -1,    64,    -1,    66,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    -1,    49,    50,    -1,    52,    53,    54,
+      55,    56,    -1,    -1,    59,    -1,    61,    62,    -1,    64,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    47,    -1,    49,    50,    -1,    52,
+      53,    54,    55,    -1,    -1,    -1,    59,    60,    61,    62,
+      -1,    64,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    -1,    49,    50,
+      -1,    52,    53,    54,    55,    56,    -1,    -1,    59,    -1,
+      61,    62,    -1,    64,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    46,    47,    -1,
+      49,    50,    -1,    52,    53,    54,    55,    56,    -1,    -1,
+      59,    -1,    61,    62,    -1,    64,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    -1,    49,    50,    -1,    52,    53,    54,    55,    56,
+      -1,    -1,    59,    -1,    61,    62,    -1,    64,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    -1,    49,    50,    -1,    52,    53,    54,
+      55,    -1,    -1,    -1,    59,    -1,    61,    62,    -1,    64,
+      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+      43,    44,    45,    46,    -1,    -1,    49,    50,    -1,    52,
+      53,    54,    55,    -1,    -1,    -1,    59,    -1,    61,    62,
+      -1,    64,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    -1,    -1,    -1,    49,    50,
+      -1,    52,    53,    54,    55,    -1,    -1,    -1,    59,    -1,
+      61,    62,    -1,    64,    33,    34,    35,    36,    37,    38,
+      39,    -1,    -1,    42,    43,    -1,    -1,    -1,    -1,    -1,
+      49,    50,    -1,    52,    53,    54,    55,    -1,    -1,    -1,
+      59,    -1,    61,    62,    -1,    64,    33,    34,    35,    36,
+      37,    38,    39,    33,    34,    35,    36,    37,    38,    39,
+      -1,    -1,    49,    50,    -1,    52,    53,    54,    55,    49,
+      50,    -1,    59,    -1,    54,    55,    -1,    64,    -1,    59,
+      -1,    -1,    -1,    -1,    64,    35,    36,    37,    38,    39,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    49,
+      50,    -1,    -1,    -1,    54,    55,    -1,    -1,    -1,    59,
+      -1,    -1,    -1,    -1,    64
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -695,26 +866,53 @@ static const yytype_int8 yycheck[] =
 static const yytype_int8 yystos[] =
 {
        0,     3,    70,    71,    72,    26,     0,    55,    26,    73,
-      74,    75,    65,    56,    63,    26,    76,    57,    83,    75,
-      77,    18,    24,    26,    58,    72,    78,    79,    80,    81,
-      82,    27,    28,    29,    55,    26,    81,    81,    81,    24,
-      56
+      74,    75,    65,    56,    63,    26,    76,    27,    57,    65,
+      78,    75,    51,    61,    27,    18,    19,    20,    21,    22,
+      23,    24,    25,    26,    34,    48,    55,    88,    90,    79,
+      76,    76,    77,    88,    88,    88,    88,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
+      46,    47,    49,    50,    52,    53,    54,    55,    59,    61,
+      62,    64,     4,     5,     6,     8,     9,    10,    11,    12,
+      26,    58,    72,    80,    81,    82,    83,    84,    85,    86,
+      88,    27,    78,    62,    63,    56,    88,    88,    88,    88,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    26,
+      88,    88,    88,    76,    56,    88,    89,    88,    88,    88,
+      26,    26,    26,    55,    55,    55,    88,    27,    28,    29,
+      30,    31,    32,    66,    88,    51,    76,    56,    63,    60,
+      27,    65,    27,    65,    88,    88,    26,    88,    88,    88,
+      88,    88,    88,    88,    88,    76,    88,    76,    56,    56,
+      14,    27,    27,    78,    80,    87,    87,    88,    88,    88,
+       7,    56,    87,    87
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    69,    70,    71,    72,    73,    73,    74,    74,    75,
-      76,    77,    77,    78,    78,    78,    79,    79,    80,    80,
-      80,    81,    81,    81,    81,    82,    83
+       0,    69,    70,    71,    72,    72,    72,    72,    73,    73,
+      74,    74,    75,    75,    76,    76,    76,    76,    77,    77,
+      78,    79,    79,    80,    80,    80,    80,    80,    80,    80,
+      80,    80,    81,    81,    81,    81,    81,    82,    82,    82,
+      82,    82,    82,    83,    83,    84,    85,    86,    86,    86,
+      86,    87,    87,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
+      88,    88,    88,    88,    89,    89,    90,    90,    90,    90,
+      90,    90,    90,    90
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     1,     6,     0,     1,     1,     3,     3,
-       1,     0,     2,     1,     1,     1,     1,     1,     3,     3,
-       3,     4,     1,     1,     1,     0,     3
+       0,     2,     1,     1,     6,     8,     7,     9,     0,     1,
+       1,     3,     3,     5,     1,     2,     4,     5,     1,     3,
+       3,     0,     2,     1,     1,     1,     1,     1,     1,     1,
+       2,     1,     4,     6,     4,     6,     4,     3,     3,     3,
+       3,     3,     3,     5,     7,     5,     7,     1,     2,     1,
+       1,     1,     1,     1,     1,     3,     4,     4,     3,     3,
+       3,     3,     3,     3,     3,     3,     2,     2,     2,     2,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     1,     3,     1,     1,     1,     1,
+       1,     1,     1,     1
 };
 
 
@@ -1177,8 +1375,694 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 2: /* program: topLevelObject  */
+#line 166 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("program", 1, 1, (yyvsp[0].tree));
+            g_root = (yyval.tree);
+        }
+#line 1385 "k0gram.tab.c"
+    break;
 
-#line 1182 "k0gram.tab.c"
+  case 3: /* topLevelObject: functionDeclaration  */
+#line 178 "k0gram.y"
+        { (yyval.tree) = tree_node("topLevelObject", 1, 1, (yyvsp[0].tree)); }
+#line 1391 "k0gram.tab.c"
+    break;
+
+  case 4: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN block  */
+#line 188 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionDeclaration", 1, 6,
+                           tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
+                           tree_leaf((yyvsp[-3].tok)), (yyvsp[-2].tree),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1402 "k0gram.tab.c"
+    break;
+
+  case 5: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type block  */
+#line 195 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionDeclaration", 2, 8,
+                           tree_leaf((yyvsp[-7].tok)), tree_leaf((yyvsp[-6].tok)),
+                           tree_leaf((yyvsp[-5].tok)), (yyvsp[-4].tree),
+                           tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
+                           (yyvsp[-1].tree), (yyvsp[0].tree));
+        }
+#line 1414 "k0gram.tab.c"
+    break;
+
+  case 6: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT expression  */
+#line 203 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionDeclaration", 3, 7,
+                           tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
+                           tree_leaf((yyvsp[-4].tok)), (yyvsp[-3].tree),
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)),
+                           (yyvsp[0].tree));
+        }
+#line 1426 "k0gram.tab.c"
+    break;
+
+  case 7: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression  */
+#line 211 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionDeclaration", 4, 9,
+                           tree_leaf((yyvsp[-8].tok)), tree_leaf((yyvsp[-7].tok)),
+                           tree_leaf((yyvsp[-6].tok)), (yyvsp[-5].tree),
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1438 "k0gram.tab.c"
+    break;
+
+  case 8: /* functionValueParameters: %empty  */
+#line 222 "k0gram.y"
+        { (yyval.tree) = NULL; }
+#line 1444 "k0gram.tab.c"
+    break;
+
+  case 9: /* functionValueParameters: functionValueParameterList  */
+#line 224 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 1450 "k0gram.tab.c"
+    break;
+
+  case 10: /* functionValueParameterList: functionValueParameter  */
+#line 229 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 1456 "k0gram.tab.c"
+    break;
+
+  case 11: /* functionValueParameterList: functionValueParameterList COMMA functionValueParameter  */
+#line 231 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionValueParameterList", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1465 "k0gram.tab.c"
+    break;
+
+  case 12: /* functionValueParameter: IDENT COLON type  */
+#line 239 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionValueParameter", 1, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1474 "k0gram.tab.c"
+    break;
+
+  case 13: /* functionValueParameter: IDENT COLON type ASSIGNMENT expression  */
+#line 244 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("functionValueParameter", 2, 5,
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1484 "k0gram.tab.c"
+    break;
+
+  case 14: /* type: IDENT  */
+#line 253 "k0gram.y"
+        { (yyval.tree) = tree_node("type", 1, 1, tree_leaf((yyvsp[0].tok))); }
+#line 1490 "k0gram.tab.c"
+    break;
+
+  case 15: /* type: IDENT QUEST  */
+#line 255 "k0gram.y"
+        { (yyval.tree) = tree_node("type", 2, 2, tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok))); }
+#line 1496 "k0gram.tab.c"
+    break;
+
+  case 16: /* type: IDENT LANGLE typeArgumentList RANGLE  */
+#line 257 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("type", 3, 4,
+                           tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
+                           (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1506 "k0gram.tab.c"
+    break;
+
+  case 17: /* type: IDENT LANGLE typeArgumentList RANGLE QUEST  */
+#line 263 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("type", 4, 5,
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1516 "k0gram.tab.c"
+    break;
+
+  case 18: /* typeArgumentList: type  */
+#line 272 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 1522 "k0gram.tab.c"
+    break;
+
+  case 19: /* typeArgumentList: typeArgumentList COMMA type  */
+#line 274 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("typeArgumentList", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1531 "k0gram.tab.c"
+    break;
+
+  case 20: /* block: LCURL statements RCURL  */
+#line 286 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("block", 1, 3,
+                           tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1540 "k0gram.tab.c"
+    break;
+
+  case 21: /* statements: %empty  */
+#line 298 "k0gram.y"
+        { (yyval.tree) = NULL; }
+#line 1546 "k0gram.tab.c"
+    break;
+
+  case 22: /* statements: statements statement  */
+#line 300 "k0gram.y"
+        {
+            if ((yyvsp[-1].tree) == NULL)
+                (yyval.tree) = (yyvsp[0].tree);
+            else
+                (yyval.tree) = tree_node("statements", 1, 2, (yyvsp[-1].tree), (yyvsp[0].tree));
+        }
+#line 1557 "k0gram.tab.c"
+    break;
+
+  case 23: /* statement: varDeclaration  */
+#line 322 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1563 "k0gram.tab.c"
+    break;
+
+  case 24: /* statement: functionDeclaration  */
+#line 323 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1569 "k0gram.tab.c"
+    break;
+
+  case 25: /* statement: ifStatement  */
+#line 324 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1575 "k0gram.tab.c"
+    break;
+
+  case 26: /* statement: whileStatement  */
+#line 325 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1581 "k0gram.tab.c"
+    break;
+
+  case 27: /* statement: forStatement  */
+#line 326 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1587 "k0gram.tab.c"
+    break;
+
+  case 28: /* statement: jumpStatement  */
+#line 327 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1593 "k0gram.tab.c"
+    break;
+
+  case 29: /* statement: assignment  */
+#line 328 "k0gram.y"
+                            { (yyval.tree) = (yyvsp[0].tree); }
+#line 1599 "k0gram.tab.c"
+    break;
+
+  case 30: /* statement: expression SEMI  */
+#line 330 "k0gram.y"
+        { (yyval.tree) = tree_node("exprStatement", 1, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
+#line 1605 "k0gram.tab.c"
+    break;
+
+  case 31: /* statement: expression  */
+#line 332 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 1611 "k0gram.tab.c"
+    break;
+
+  case 32: /* varDeclaration: VAL IDENT ASSIGNMENT expression  */
+#line 341 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("varDeclaration", 1, 4,
+                           tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1621 "k0gram.tab.c"
+    break;
+
+  case 33: /* varDeclaration: VAL IDENT COLON type ASSIGNMENT expression  */
+#line 347 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("varDeclaration", 2, 6,
+                           tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
+                           tree_leaf((yyvsp[-3].tok)), (yyvsp[-2].tree),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1632 "k0gram.tab.c"
+    break;
+
+  case 34: /* varDeclaration: VAR IDENT ASSIGNMENT expression  */
+#line 354 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("varDeclaration", 3, 4,
+                           tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1642 "k0gram.tab.c"
+    break;
+
+  case 35: /* varDeclaration: VAR IDENT COLON type ASSIGNMENT expression  */
+#line 360 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("varDeclaration", 4, 6,
+                           tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
+                           tree_leaf((yyvsp[-3].tok)), (yyvsp[-2].tree),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1653 "k0gram.tab.c"
+    break;
+
+  case 36: /* varDeclaration: VAR IDENT COLON type  */
+#line 367 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("varDeclaration", 5, 4,
+                           tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
+                           tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1663 "k0gram.tab.c"
+    break;
+
+  case 37: /* assignment: IDENT ASSIGNMENT expression  */
+#line 380 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 1, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1672 "k0gram.tab.c"
+    break;
+
+  case 38: /* assignment: IDENT ADD_ASSIGN expression  */
+#line 385 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 2, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1681 "k0gram.tab.c"
+    break;
+
+  case 39: /* assignment: IDENT SUB_ASSIGN expression  */
+#line 390 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 3, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1690 "k0gram.tab.c"
+    break;
+
+  case 40: /* assignment: IDENT MUL_ASSIGN expression  */
+#line 395 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 4, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1699 "k0gram.tab.c"
+    break;
+
+  case 41: /* assignment: IDENT DIV_ASSIGN expression  */
+#line 400 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 5, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1708 "k0gram.tab.c"
+    break;
+
+  case 42: /* assignment: IDENT MOD_ASSIGN expression  */
+#line 405 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("assignment", 6, 3,
+                           tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1717 "k0gram.tab.c"
+    break;
+
+  case 43: /* ifStatement: IF LPAREN expression RPAREN controlStructureBody  */
+#line 417 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("ifStatement", 1, 5,
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1727 "k0gram.tab.c"
+    break;
+
+  case 44: /* ifStatement: IF LPAREN expression RPAREN controlStructureBody ELSE controlStructureBody  */
+#line 423 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("ifStatement", 2, 7,
+                           tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
+                           (yyvsp[-4].tree), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1738 "k0gram.tab.c"
+    break;
+
+  case 45: /* whileStatement: WHILE LPAREN expression RPAREN controlStructureBody  */
+#line 433 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("whileStatement", 1, 5,
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1748 "k0gram.tab.c"
+    break;
+
+  case 46: /* forStatement: FOR LPAREN IDENT IN expression RPAREN controlStructureBody  */
+#line 442 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("forStatement", 1, 7,
+                           tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
+                           tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1759 "k0gram.tab.c"
+    break;
+
+  case 47: /* jumpStatement: RETURN  */
+#line 452 "k0gram.y"
+        { (yyval.tree) = tree_node("jumpStatement", 1, 1, tree_leaf((yyvsp[0].tok))); }
+#line 1765 "k0gram.tab.c"
+    break;
+
+  case 48: /* jumpStatement: RETURN expression  */
+#line 454 "k0gram.y"
+        { (yyval.tree) = tree_node("jumpStatement", 2, 2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1771 "k0gram.tab.c"
+    break;
+
+  case 49: /* jumpStatement: BREAK  */
+#line 456 "k0gram.y"
+        { (yyval.tree) = tree_node("jumpStatement", 3, 1, tree_leaf((yyvsp[0].tok))); }
+#line 1777 "k0gram.tab.c"
+    break;
+
+  case 50: /* jumpStatement: CONTINUE  */
+#line 458 "k0gram.y"
+        { (yyval.tree) = tree_node("jumpStatement", 4, 1, tree_leaf((yyvsp[0].tok))); }
+#line 1783 "k0gram.tab.c"
+    break;
+
+  case 51: /* controlStructureBody: block  */
+#line 462 "k0gram.y"
+                { (yyval.tree) = (yyvsp[0].tree); }
+#line 1789 "k0gram.tab.c"
+    break;
+
+  case 52: /* controlStructureBody: statement  */
+#line 463 "k0gram.y"
+                { (yyval.tree) = (yyvsp[0].tree); }
+#line 1795 "k0gram.tab.c"
+    break;
+
+  case 53: /* expression: literal  */
+#line 473 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 1801 "k0gram.tab.c"
+    break;
+
+  case 54: /* expression: IDENT  */
+#line 475 "k0gram.y"
+        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 1807 "k0gram.tab.c"
+    break;
+
+  case 55: /* expression: expression LPAREN RPAREN  */
+#line 477 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("callExpr", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1816 "k0gram.tab.c"
+    break;
+
+  case 56: /* expression: expression LPAREN argumentList RPAREN  */
+#line 482 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("callExpr", 2, 4,
+                           (yyvsp[-3].tree), tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1825 "k0gram.tab.c"
+    break;
+
+  case 57: /* expression: expression LSQUARE expression RSQUARE  */
+#line 487 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("indexExpr", 1, 4,
+                           (yyvsp[-3].tree), tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1834 "k0gram.tab.c"
+    break;
+
+  case 58: /* expression: expression DOT IDENT  */
+#line 492 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("memberExpr", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1843 "k0gram.tab.c"
+    break;
+
+  case 59: /* expression: expression SAFE_CALL IDENT  */
+#line 497 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("safeMemberExpr", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
+        }
+#line 1852 "k0gram.tab.c"
+    break;
+
+  case 60: /* expression: expression AS type  */
+#line 502 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("castExpr", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 1861 "k0gram.tab.c"
+    break;
+
+  case 61: /* expression: expression ADD expression  */
+#line 507 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1867 "k0gram.tab.c"
+    break;
+
+  case 62: /* expression: expression SUB expression  */
+#line 509 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 2,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1873 "k0gram.tab.c"
+    break;
+
+  case 63: /* expression: expression MUL expression  */
+#line 511 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 3,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1879 "k0gram.tab.c"
+    break;
+
+  case 64: /* expression: expression DIV expression  */
+#line 513 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 4,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1885 "k0gram.tab.c"
+    break;
+
+  case 65: /* expression: expression MOD expression  */
+#line 515 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 5,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1891 "k0gram.tab.c"
+    break;
+
+  case 66: /* expression: SUB expression  */
+#line 517 "k0gram.y"
+        { (yyval.tree) = tree_node("unaryExpr",  1,  2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1897 "k0gram.tab.c"
+    break;
+
+  case 67: /* expression: NOT expression  */
+#line 519 "k0gram.y"
+        { (yyval.tree) = tree_node("unaryExpr",  2,  2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1903 "k0gram.tab.c"
+    break;
+
+  case 68: /* expression: expression INCR  */
+#line 521 "k0gram.y"
+        { (yyval.tree) = tree_node("postfixExpr", 1, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
+#line 1909 "k0gram.tab.c"
+    break;
+
+  case 69: /* expression: expression DECR  */
+#line 523 "k0gram.y"
+        { (yyval.tree) = tree_node("postfixExpr", 2, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
+#line 1915 "k0gram.tab.c"
+    break;
+
+  case 70: /* expression: expression EQ expression  */
+#line 525 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 6,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1921 "k0gram.tab.c"
+    break;
+
+  case 71: /* expression: expression NEQ expression  */
+#line 527 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 7,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1927 "k0gram.tab.c"
+    break;
+
+  case 72: /* expression: expression LANGLE expression  */
+#line 529 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 8,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1933 "k0gram.tab.c"
+    break;
+
+  case 73: /* expression: expression RANGLE expression  */
+#line 531 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 9,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1939 "k0gram.tab.c"
+    break;
+
+  case 74: /* expression: expression LTE expression  */
+#line 533 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 10, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1945 "k0gram.tab.c"
+    break;
+
+  case 75: /* expression: expression GTE expression  */
+#line 535 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 11, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1951 "k0gram.tab.c"
+    break;
+
+  case 76: /* expression: expression REF_EQ expression  */
+#line 537 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 12, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1957 "k0gram.tab.c"
+    break;
+
+  case 77: /* expression: expression REF_NEQ expression  */
+#line 539 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 13, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1963 "k0gram.tab.c"
+    break;
+
+  case 78: /* expression: expression AND expression  */
+#line 541 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 14, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1969 "k0gram.tab.c"
+    break;
+
+  case 79: /* expression: expression OR expression  */
+#line 543 "k0gram.y"
+        { (yyval.tree) = tree_node("binaryExpr", 15, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1975 "k0gram.tab.c"
+    break;
+
+  case 80: /* expression: expression RANGE expression  */
+#line 545 "k0gram.y"
+        { (yyval.tree) = tree_node("rangeExpr",  1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1981 "k0gram.tab.c"
+    break;
+
+  case 81: /* expression: expression RANGE_UNTIL expression  */
+#line 547 "k0gram.y"
+        { (yyval.tree) = tree_node("rangeExpr",  2,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1987 "k0gram.tab.c"
+    break;
+
+  case 82: /* expression: expression ELVIS expression  */
+#line 549 "k0gram.y"
+        { (yyval.tree) = tree_node("elvisExpr",  1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
+#line 1993 "k0gram.tab.c"
+    break;
+
+  case 83: /* expression: LPAREN expression RPAREN  */
+#line 551 "k0gram.y"
+        { (yyval.tree) = (yyvsp[-1].tree); }
+#line 1999 "k0gram.tab.c"
+    break;
+
+  case 84: /* argumentList: expression  */
+#line 556 "k0gram.y"
+        { (yyval.tree) = (yyvsp[0].tree); }
+#line 2005 "k0gram.tab.c"
+    break;
+
+  case 85: /* argumentList: argumentList COMMA expression  */
+#line 558 "k0gram.y"
+        {
+            (yyval.tree) = tree_node("argumentList", 1, 3,
+                           (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
+        }
+#line 2014 "k0gram.tab.c"
+    break;
+
+  case 86: /* literal: INTEGERLITERAL  */
+#line 570 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2020 "k0gram.tab.c"
+    break;
+
+  case 87: /* literal: LONGLITERAL  */
+#line 571 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2026 "k0gram.tab.c"
+    break;
+
+  case 88: /* literal: REALLITERAL  */
+#line 572 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2032 "k0gram.tab.c"
+    break;
+
+  case 89: /* literal: DOUBLELITERAL  */
+#line 573 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2038 "k0gram.tab.c"
+    break;
+
+  case 90: /* literal: BOOLEANLITERAL  */
+#line 574 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2044 "k0gram.tab.c"
+    break;
+
+  case 91: /* literal: CHARACTERLITERAL  */
+#line 575 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2050 "k0gram.tab.c"
+    break;
+
+  case 92: /* literal: STRINGLITERAL  */
+#line 576 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2056 "k0gram.tab.c"
+    break;
+
+  case 93: /* literal: NULLLITERAL  */
+#line 577 "k0gram.y"
+                        { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
+#line 2062 "k0gram.tab.c"
+    break;
+
+
+#line 2066 "k0gram.tab.c"
 
       default: break;
     }
@@ -1371,4 +2255,12 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 198 "k0gram.y"
+#line 580 "k0gram.y"
+
+
+void yyerror(const char *s) {
+    g_syntax_errors++;
+    fprintf(stderr, "%s:%d: syntax error: %s\n",
+            current_filename ? current_filename : "<stdin>",
+            lineno, s);
+}

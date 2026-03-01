@@ -4,18 +4,18 @@
 #include <string.h>
 #include <ctype.h>
 #include "k0gram.tab.h"
-#include "token.h"     /* token_t, token_create(), token_free() */
+#include "token.h"     
 
-/* Your existing state */
+
 int lineno = 1;
 char *current_filename;
 
 int comment_depth = 0;
 
-/* HW exit-code rule: lexical errors -> status 1 (handled in main) */
+
 int g_lex_errors = 0;
 
-/* Rename to avoid colliding with token.h's struct token */
+
 struct old_token {
    int category;
    char *text;
@@ -28,14 +28,14 @@ struct old_token {
 
 struct old_token *yytoken;
 
-/* Change: do NOT exit(1) here */
+
 void lexical_error(const char *msg) {
    fprintf(stderr, "%s:%d: lexical error: %s\n",
            current_filename ? current_filename : "<stdin>", lineno, msg);
    g_lex_errors++;
 }
 
-/* same helpers */
+
 char *copy_string(const char *s) {
    char *p = malloc(strlen(s)+1);
    if (!p) exit(1);
@@ -43,14 +43,14 @@ char *copy_string(const char *s) {
    return p;
 }
 
-/* NEW helper: after make_token, set yylval.tok using yytoken->text (the full built lexeme) */
+
 static void set_yylval_from_yytoken(int category) {
    yylval.tok = token_create(category,
                              (yytoken && yytoken->text) ? yytoken->text : yytext,
                              lineno);
 }
 
-/* OPTIONAL but recommended to be valgrind-clean: free the old_token after copying to yylval */
+
 static void free_yytoken(void) {
    if (!yytoken) return;
    free(yytoken->text);
@@ -59,7 +59,7 @@ static void free_yytoken(void) {
    yytoken = NULL;
 }
 
-/* Your make_token stays the same */
+
 void make_token(int category) {
    yytoken = malloc(sizeof(struct old_token));
    if (!yytoken) exit(1);
@@ -86,7 +86,7 @@ void make_token(int category) {
 "#".*           ;
 "//".*          ;
 
-/* ===== Block comments with nesting ===== */
+
 
 "/*" {
     comment_depth = 1;
@@ -109,7 +109,7 @@ void make_token(int category) {
     return 0;
 }
 
-/* ===== Keywords / literals ===== */
+
 
 "fun"      { make_token(FUN);      set_yylval_from_yytoken(FUN);      free_yytoken(); return FUN; }
 "val"      { make_token(VAL);      set_yylval_from_yytoken(VAL);      free_yytoken(); return VAL; }
@@ -132,7 +132,7 @@ void make_token(int category) {
 "false"    { make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); free_yytoken(); return BOOLEANLITERAL; }
 "null"     { make_token(NULLLITERAL);    set_yylval_from_yytoken(NULLLITERAL);    free_yytoken(); return NULLLITERAL; }
 
-/* ===== Identifiers ===== */
+
 
 [a-zA-Z_][a-zA-Z0-9_]* {
     make_token(IDENT);
@@ -141,7 +141,7 @@ void make_token(int category) {
     return IDENT;
 }
 
-/* ===== Numeric literals ===== */
+
 
 ([0-9]+"."[0-9]*([eE][+-]?[0-9]+)?)[dD] {
     make_token(DOUBLELITERAL);
@@ -175,7 +175,7 @@ void make_token(int category) {
     return INTEGERLITERAL;
 }
 
-/* ===== Character literal ===== */
+
 
 \'([^\\\n]|\\.)\' {
     make_token(CHARACTERLITERAL);
@@ -188,7 +188,7 @@ void make_token(int category) {
     lexical_error("unterminated character literal");
 }
 
-/* ===== String literal (your accumulator) ===== */
+
 
 \" {
     BEGIN(STRING);
@@ -269,7 +269,7 @@ void make_token(int category) {
     return 0;
 }
 
-/* ===== Multi-char operators ===== */
+
 
 "==="    { make_token(REF_EQ);       set_yylval_from_yytoken(REF_EQ);       free_yytoken(); return REF_EQ; }
 "!=="    { make_token(REF_NEQ);      set_yylval_from_yytoken(REF_NEQ);      free_yytoken(); return REF_NEQ; }
@@ -293,7 +293,7 @@ void make_token(int category) {
 "?."     { make_token(SAFE_CALL);    set_yylval_from_yytoken(SAFE_CALL);    free_yytoken(); return SAFE_CALL; }
 "?:"     { make_token(ELVIS);        set_yylval_from_yytoken(ELVIS);        free_yytoken(); return ELVIS; }
 
-/* ===== Single-char tokens ===== */
+
 
 "+"  { make_token(ADD);        set_yylval_from_yytoken(ADD);        free_yytoken(); return ADD; }
 "-"  { make_token(SUB);        set_yylval_from_yytoken(SUB);        free_yytoken(); return SUB; }
@@ -316,7 +316,7 @@ void make_token(int category) {
 "<"  { make_token(LANGLE);     set_yylval_from_yytoken(LANGLE);     free_yytoken(); return LANGLE; }
 ">"  { make_token(RANGLE);     set_yylval_from_yytoken(RANGLE);     free_yytoken(); return RANGLE; }
 
-/* ===== Catch-all ===== */
+
 
 . {
     lexical_error("illegal character");

@@ -44,6 +44,13 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 1 "k0gram.y"
+
+#include "tree.h"
+#include "token.h"
+
+#line 54 "k0gram.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -126,7 +133,17 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 29 "k0gram.y"
+
+    token_t       *tok;
+    tree_t       *tree;
+
+#line 144 "k0gram.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
