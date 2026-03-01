@@ -20,6 +20,12 @@ tree_t *g_root = NULL;
 int g_syntax_errors = 0;
 %}
 
+/* IMPORTANT: this goes into k0gram.tab.h so lex.yy.c can see token_t/tree_t */
+%code requires {
+  #include "token.h"
+  #include "tree.h"
+}
+
 /* yylval must carry either token* (from lexer) or tree* (from parser) */
 %union {
   token_t *tok;
@@ -129,25 +135,20 @@ int g_syntax_errors = 0;
 
 %%
 
-/* ========= Start symbol ========= */
-
 program:
     topLevelObject
-    { g_root = $1; $$ = $1; }          /* 1 child => $$=$1, plus assign global root */
+    { g_root = $1; $$ = $1; }
 ;
-
-/* ========= Top-level ========= */
 
 topLevelObject:
     functionDeclaration
-    { $$ = $1; }                       /* 1 child */
+    { $$ = $1; }
 ;
 
 functionDeclaration:
     FUN IDENT LPAREN functionValueParameters RPAREN block
     {
-      /* RHS has > 1 children: build node, insert token leaves */
-      $$ = tree_node("functionDeclaration", 6,
+      $$ = tree_node("functionDeclaration", 6, 6,
                      tree_leaf($1),
                      tree_leaf($2),
                      tree_leaf($3),
@@ -159,17 +160,17 @@ functionDeclaration:
 
 functionValueParameters:
     /* empty */
-    { $$ = NULL; }                     /* 0 children */
+    { $$ = NULL; }
   | functionValueParameterList
-    { $$ = $1; }                       /* 1 child */
+    { $$ = $1; }
 ;
 
 functionValueParameterList:
     functionValueParameter
-    { $$ = $1; }                       /* 1 child */
+    { $$ = $1; }
   | functionValueParameterList COMMA functionValueParameter
     {
-      $$ = tree_node("functionValueParameterList", 3,
+      $$ = tree_node("functionValueParameterList", 3, 3,
                      $1, tree_leaf($2), $3);
     }
 ;
@@ -177,14 +178,14 @@ functionValueParameterList:
 functionValueParameter:
     IDENT COLON type
     {
-      $$ = tree_node("functionValueParameter", 3,
+      $$ = tree_node("functionValueParameter", 3, 3,
                      tree_leaf($1), tree_leaf($2), $3);
     }
 ;
 
 type:
     IDENT
-    { $$ = tree_node("type", 1, tree_leaf($1)); } /* RHS=1 token, but still ok to wrap */
+    { $$ = tree_node("type", 1, 1, tree_leaf($1)); }
 ;
 
 typeConstraints:
@@ -203,7 +204,7 @@ statements:
     /* empty */
     { $$ = NULL; }
   | statements statement
-    { $$ = tree_node("statements", 2, $1, $2); }
+    { $$ = tree_node("statements", 2, 2, $1, $2); }
 ;
 
 statement:
@@ -227,17 +228,17 @@ declaration:
 assignment:
     IDENT ASSIGNMENT expression
     {
-      $$ = tree_node("assignment", 3,
+      $$ = tree_node("assignment", 3, 3,
                      tree_leaf($1), tree_leaf($2), $3);
     }
   | IDENT ADD_ASSIGN expression
     {
-      $$ = tree_node("assignment", 3,
+      $$ = tree_node("assignment", 3, 3,
                      tree_leaf($1), tree_leaf($2), $3);
     }
   | IDENT SUB_ASSIGN expression
     {
-      $$ = tree_node("assignment", 3,
+      $$ = tree_node("assignment", 3, 3,
                      tree_leaf($1), tree_leaf($2), $3);
     }
 ;
@@ -247,7 +248,7 @@ assignment:
 expression:
     IDENT LPAREN STRINGLITERAL RPAREN
     {
-      $$ = tree_node("callExpr", 4,
+      $$ = tree_node("callExpr", 4, 4,
                      tree_leaf($1), tree_leaf($2), tree_leaf($3), tree_leaf($4));
     }
   | STRINGLITERAL
@@ -271,7 +272,7 @@ controlStructureBody:
     block
     { $$ = $1; }
   | statement SEMI
-    { $$ = tree_node("controlStructureBody", 2, $1, tree_leaf($2)); }
+    { $$ = tree_node("controlStructureBody", 2, 2, $1, tree_leaf($2)); }
 ;
 
 /* ===== Block ===== */
@@ -279,7 +280,7 @@ controlStructureBody:
 block:
     LCURL statements RCURL
     {
-      $$ = tree_node("block", 3,
+      $$ = tree_node("block", 3, 3,
                      tree_leaf($1), $2, tree_leaf($3));
     }
 ;
