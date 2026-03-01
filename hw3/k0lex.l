@@ -15,8 +15,8 @@ int comment_depth = 0;
 /* HW exit-code rule: lexical errors -> status 1 (handled in main) */
 int g_lex_errors = 0;
 
-/* Keep your struct if you want (not used by parser anymore, but harmless) */
-struct token {
+/* Rename to avoid colliding with token.h's struct token */
+struct old_token {
    int category;
    char *text;
    int lineno;
@@ -26,7 +26,7 @@ struct token {
    char *sval;
 };
 
-struct token *yytoken;
+struct old_token *yytoken;
 
 /* Change: do NOT exit(1) here */
 void lexical_error(const char *msg) {
@@ -45,16 +45,23 @@ char *copy_string(const char *s) {
 
 /* NEW helper: after make_token, set yylval.tok using yytoken->text (the full built lexeme) */
 static void set_yylval_from_yytoken(int category) {
-   /* Use yytoken->text so STRINGLITERAL gets full accumulated string */
    yylval.tok = token_create(category,
                              (yytoken && yytoken->text) ? yytoken->text : yytext,
                              lineno);
 }
 
-/* Your make_token stays the same, but we’ll call set_yylval_from_yytoken()
-   from each rule right after make_token() */
+/* OPTIONAL but recommended to be valgrind-clean: free the old_token after copying to yylval */
+static void free_yytoken(void) {
+   if (!yytoken) return;
+   free(yytoken->text);
+   free(yytoken->sval);
+   free(yytoken);
+   yytoken = NULL;
+}
+
+/* Your make_token stays the same */
 void make_token(int category) {
-   yytoken = malloc(sizeof(struct token));
+   yytoken = malloc(sizeof(struct old_token));
    if (!yytoken) exit(1);
 
    yytoken->category = category;
@@ -68,6 +75,7 @@ void make_token(int category) {
 %}
 
 %option noyywrap
+%option noinput nounput
 %x COMMENT STRING
 
 %%
@@ -98,37 +106,38 @@ void make_token(int category) {
 
 <COMMENT><<EOF>> {
     lexical_error("unterminated comment");
-    return 0; /* stop scanning */
+    return 0;
 }
 
 /* ===== Keywords / literals ===== */
 
-"fun"      { make_token(FUN);      set_yylval_from_yytoken(FUN);      return FUN; }
-"val"      { make_token(VAL);      set_yylval_from_yytoken(VAL);      return VAL; }
-"var"      { make_token(VAR);      set_yylval_from_yytoken(VAR);      return VAR; }
-"if"       { make_token(IF);       set_yylval_from_yytoken(IF);       return IF; }
-"else"     { make_token(ELSE);     set_yylval_from_yytoken(ELSE);     return ELSE; }
-"while"    { make_token(WHILE);    set_yylval_from_yytoken(WHILE);    return WHILE; }
-"for"      { make_token(FOR);      set_yylval_from_yytoken(FOR);      return FOR; }
-"return"   { make_token(RETURN);   set_yylval_from_yytoken(RETURN);   return RETURN; }
-"break"    { make_token(BREAK);    set_yylval_from_yytoken(BREAK);    return BREAK; }
-"continue" { make_token(CONTINUE); set_yylval_from_yytoken(CONTINUE); return CONTINUE; }
-"when"     { make_token(WHEN);     set_yylval_from_yytoken(WHEN);     return WHEN; }
-"in"       { make_token(IN);       set_yylval_from_yytoken(IN);       return IN; }
-"do"       { make_token(DO);       set_yylval_from_yytoken(DO);       return DO; }
-"import"   { make_token(IMPORT);   set_yylval_from_yytoken(IMPORT);   return IMPORT; }
-"const"    { make_token(CONST);    set_yylval_from_yytoken(CONST);    return CONST; }
-"as"       { make_token(AS);       set_yylval_from_yytoken(AS);       return AS; }
+"fun"      { make_token(FUN);      set_yylval_from_yytoken(FUN);      free_yytoken(); return FUN; }
+"val"      { make_token(VAL);      set_yylval_from_yytoken(VAL);      free_yytoken(); return VAL; }
+"var"      { make_token(VAR);      set_yylval_from_yytoken(VAR);      free_yytoken(); return VAR; }
+"if"       { make_token(IF);       set_yylval_from_yytoken(IF);       free_yytoken(); return IF; }
+"else"     { make_token(ELSE);     set_yylval_from_yytoken(ELSE);     free_yytoken(); return ELSE; }
+"while"    { make_token(WHILE);    set_yylval_from_yytoken(WHILE);    free_yytoken(); return WHILE; }
+"for"      { make_token(FOR);      set_yylval_from_yytoken(FOR);      free_yytoken(); return FOR; }
+"return"   { make_token(RETURN);   set_yylval_from_yytoken(RETURN);   free_yytoken(); return RETURN; }
+"break"    { make_token(BREAK);    set_yylval_from_yytoken(BREAK);    free_yytoken(); return BREAK; }
+"continue" { make_token(CONTINUE); set_yylval_from_yytoken(CONTINUE); free_yytoken(); return CONTINUE; }
+"when"     { make_token(WHEN);     set_yylval_from_yytoken(WHEN);     free_yytoken(); return WHEN; }
+"in"       { make_token(IN);       set_yylval_from_yytoken(IN);       free_yytoken(); return IN; }
+"do"       { make_token(DO);       set_yylval_from_yytoken(DO);       free_yytoken(); return DO; }
+"import"   { make_token(IMPORT);   set_yylval_from_yytoken(IMPORT);   free_yytoken(); return IMPORT; }
+"const"    { make_token(CONST);    set_yylval_from_yytoken(CONST);    free_yytoken(); return CONST; }
+"as"       { make_token(AS);       set_yylval_from_yytoken(AS);       free_yytoken(); return AS; }
 
-"true"     { make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); return BOOLEANLITERAL; }
-"false"    { make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); return BOOLEANLITERAL; }
-"null"     { make_token(NULLLITERAL);    set_yylval_from_yytoken(NULLLITERAL);    return NULLLITERAL; }
+"true"     { make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); free_yytoken(); return BOOLEANLITERAL; }
+"false"    { make_token(BOOLEANLITERAL); set_yylval_from_yytoken(BOOLEANLITERAL); free_yytoken(); return BOOLEANLITERAL; }
+"null"     { make_token(NULLLITERAL);    set_yylval_from_yytoken(NULLLITERAL);    free_yytoken(); return NULLLITERAL; }
 
 /* ===== Identifiers ===== */
 
 [a-zA-Z_][a-zA-Z0-9_]* {
     make_token(IDENT);
     set_yylval_from_yytoken(IDENT);
+    free_yytoken();
     return IDENT;
 }
 
@@ -138,6 +147,7 @@ void make_token(int category) {
     make_token(DOUBLELITERAL);
     yytoken->dval = strtod(yytext, NULL);
     set_yylval_from_yytoken(DOUBLELITERAL);
+    free_yytoken();
     return DOUBLELITERAL;
 }
 
@@ -145,6 +155,7 @@ void make_token(int category) {
     make_token(REALLITERAL);
     yytoken->dval = strtod(yytext, NULL);
     set_yylval_from_yytoken(REALLITERAL);
+    free_yytoken();
     return REALLITERAL;
 }
 
@@ -152,6 +163,7 @@ void make_token(int category) {
     make_token(LONGLITERAL);
     yytoken->ival = strtol(yytext, NULL, 10);
     set_yylval_from_yytoken(LONGLITERAL);
+    free_yytoken();
     return LONGLITERAL;
 }
 
@@ -159,6 +171,7 @@ void make_token(int category) {
     make_token(INTEGERLITERAL);
     yytoken->ival = strtol(yytext, NULL, 10);
     set_yylval_from_yytoken(INTEGERLITERAL);
+    free_yytoken();
     return INTEGERLITERAL;
 }
 
@@ -166,41 +179,22 @@ void make_token(int category) {
 
 \'([^\\\n]|\\.)\' {
     make_token(CHARACTERLITERAL);
-
-    char c;
-    if (yytext[1] == '\\') {
-        switch (yytext[2]) {
-            case 'n': c = '\n'; break;
-            case 't': c = '\t'; break;
-            case '\\': c = '\\'; break;
-            case '\'': c = '\''; break;
-            default:
-                lexical_error("invalid character escape");
-                /* recover by not returning a token */
-                break;
-        }
-    } else {
-        c = yytext[1];
-    }
-
-    yytoken->ival = c;
     set_yylval_from_yytoken(CHARACTERLITERAL);
+    free_yytoken();
     return CHARACTERLITERAL;
 }
 
 \'([^\\\n]|\\.)* {
     lexical_error("unterminated character literal");
-    /* discard and continue */
 }
 
-/* ===== String literal (your original accumulator) ===== */
+/* ===== String literal (your accumulator) ===== */
 
 \" {
     BEGIN(STRING);
 
     make_token(STRINGLITERAL);
 
-    /* overwrite text with dynamic buffer */
     free(yytoken->text);
     yytoken->text = malloc(2);
     strcpy(yytoken->text, "\"");
@@ -210,14 +204,13 @@ void make_token(int category) {
 }
 
 <STRING>\" {
-    /* append closing quote to raw text */
     yytoken->text = realloc(yytoken->text, strlen(yytoken->text)+2);
     strcat(yytoken->text, "\"");
 
     BEGIN(INITIAL);
 
-    /* IMPORTANT: now yytoken->text holds the full string lexeme */
     set_yylval_from_yytoken(STRINGLITERAL);
+    free_yytoken();
     return STRINGLITERAL;
 }
 
@@ -278,61 +271,59 @@ void make_token(int category) {
 
 /* ===== Multi-char operators ===== */
 
-"==="    { make_token(REF_EQ);       set_yylval_from_yytoken(REF_EQ);       return REF_EQ; }
-"!=="    { make_token(REF_NEQ);      set_yylval_from_yytoken(REF_NEQ);      return REF_NEQ; }
-"=="     { make_token(EQ);           set_yylval_from_yytoken(EQ);           return EQ; }
-"!="     { make_token(NEQ);          set_yylval_from_yytoken(NEQ);          return NEQ; }
-">="     { make_token(GTE);          set_yylval_from_yytoken(GTE);          return GTE; }
-"<="     { make_token(LTE);          set_yylval_from_yytoken(LTE);          return LTE; }
-"..<"    { make_token(RANGE_UNTIL);  set_yylval_from_yytoken(RANGE_UNTIL);  return RANGE_UNTIL; }
-".."     { make_token(RANGE);        set_yylval_from_yytoken(RANGE);        return RANGE; }
-"&&"     { make_token(AND);          set_yylval_from_yytoken(AND);          return AND; }
-"||"     { make_token(OR);           set_yylval_from_yytoken(OR);           return OR; }
-"++"     { make_token(INCR);         set_yylval_from_yytoken(INCR);         return INCR; }
-"--"     { make_token(DECR);         set_yylval_from_yytoken(DECR);         return DECR; }
-"+="     { make_token(ADD_ASSIGN);   set_yylval_from_yytoken(ADD_ASSIGN);   return ADD_ASSIGN; }
-"-="     { make_token(SUB_ASSIGN);   set_yylval_from_yytoken(SUB_ASSIGN);   return SUB_ASSIGN; }
-"*="     { make_token(MUL_ASSIGN);   set_yylval_from_yytoken(MUL_ASSIGN);   return MUL_ASSIGN; }
-/* NOTE: your original had DIV_ASSIGN but no rule for it; keep if you have it */
-"/="     { make_token(DIV_ASSIGN);   set_yylval_from_yytoken(DIV_ASSIGN);   return DIV_ASSIGN; }
-"%="     { make_token(MOD_ASSIGN);   set_yylval_from_yytoken(MOD_ASSIGN);   return MOD_ASSIGN; }
-"->"     { make_token(ARROW);        set_yylval_from_yytoken(ARROW);        return ARROW; }
-"::"     { make_token(DOUBLE_COLON); set_yylval_from_yytoken(DOUBLE_COLON); return DOUBLE_COLON; }
-"?."     { make_token(SAFE_CALL);    set_yylval_from_yytoken(SAFE_CALL);    return SAFE_CALL; }
-"?:"     { make_token(ELVIS);        set_yylval_from_yytoken(ELVIS);        return ELVIS; }
+"==="    { make_token(REF_EQ);       set_yylval_from_yytoken(REF_EQ);       free_yytoken(); return REF_EQ; }
+"!=="    { make_token(REF_NEQ);      set_yylval_from_yytoken(REF_NEQ);      free_yytoken(); return REF_NEQ; }
+"=="     { make_token(EQ);           set_yylval_from_yytoken(EQ);           free_yytoken(); return EQ; }
+"!="     { make_token(NEQ);          set_yylval_from_yytoken(NEQ);          free_yytoken(); return NEQ; }
+">="     { make_token(GTE);          set_yylval_from_yytoken(GTE);          free_yytoken(); return GTE; }
+"<="     { make_token(LTE);          set_yylval_from_yytoken(LTE);          free_yytoken(); return LTE; }
+"..<"    { make_token(RANGE_UNTIL);  set_yylval_from_yytoken(RANGE_UNTIL);  free_yytoken(); return RANGE_UNTIL; }
+".."     { make_token(RANGE);        set_yylval_from_yytoken(RANGE);        free_yytoken(); return RANGE; }
+"&&"     { make_token(AND);          set_yylval_from_yytoken(AND);          free_yytoken(); return AND; }
+"||"     { make_token(OR);           set_yylval_from_yytoken(OR);           free_yytoken(); return OR; }
+"++"     { make_token(INCR);         set_yylval_from_yytoken(INCR);         free_yytoken(); return INCR; }
+"--"     { make_token(DECR);         set_yylval_from_yytoken(DECR);         free_yytoken(); return DECR; }
+"+="     { make_token(ADD_ASSIGN);   set_yylval_from_yytoken(ADD_ASSIGN);   free_yytoken(); return ADD_ASSIGN; }
+"-="     { make_token(SUB_ASSIGN);   set_yylval_from_yytoken(SUB_ASSIGN);   free_yytoken(); return SUB_ASSIGN; }
+"*="     { make_token(MUL_ASSIGN);   set_yylval_from_yytoken(MUL_ASSIGN);   free_yytoken(); return MUL_ASSIGN; }
+"/="     { make_token(DIV_ASSIGN);   set_yylval_from_yytoken(DIV_ASSIGN);   free_yytoken(); return DIV_ASSIGN; }
+"%="     { make_token(MOD_ASSIGN);   set_yylval_from_yytoken(MOD_ASSIGN);   free_yytoken(); return MOD_ASSIGN; }
+"->"     { make_token(ARROW);        set_yylval_from_yytoken(ARROW);        free_yytoken(); return ARROW; }
+"::"     { make_token(DOUBLE_COLON); set_yylval_from_yytoken(DOUBLE_COLON); free_yytoken(); return DOUBLE_COLON; }
+"?."     { make_token(SAFE_CALL);    set_yylval_from_yytoken(SAFE_CALL);    free_yytoken(); return SAFE_CALL; }
+"?:"     { make_token(ELVIS);        set_yylval_from_yytoken(ELVIS);        free_yytoken(); return ELVIS; }
 
 /* ===== Single-char tokens ===== */
 
-"+"  { make_token(ADD);        set_yylval_from_yytoken(ADD);        return ADD; }
-"-"  { make_token(SUB);        set_yylval_from_yytoken(SUB);        return SUB; }
-"*"  { make_token(MUL);        set_yylval_from_yytoken(MUL);        return MUL; }
-"/"  { make_token(DIV);        set_yylval_from_yytoken(DIV);        return DIV; }
-"%"  { make_token(MOD);        set_yylval_from_yytoken(MOD);        return MOD; }
-"="  { make_token(ASSIGNMENT); set_yylval_from_yytoken(ASSIGNMENT); return ASSIGNMENT; }
-"!"  { make_token(NOT);        set_yylval_from_yytoken(NOT);        return NOT; }
-"?"  { make_token(QUEST);      set_yylval_from_yytoken(QUEST);      return QUEST; }
-";"  { make_token(SEMI);       set_yylval_from_yytoken(SEMI);       return SEMI; }
-":"  { make_token(COLON);      set_yylval_from_yytoken(COLON);      return COLON; }
-","  { make_token(COMMA);      set_yylval_from_yytoken(COMMA);      return COMMA; }
-"."  { make_token(DOT);        set_yylval_from_yytoken(DOT);        return DOT; }
-"("  { make_token(LPAREN);     set_yylval_from_yytoken(LPAREN);     return LPAREN; }
-")"  { make_token(RPAREN);     set_yylval_from_yytoken(RPAREN);     return RPAREN; }
-"{"  { make_token(LCURL);      set_yylval_from_yytoken(LCURL);      return LCURL; }
-"}"  { make_token(RCURL);      set_yylval_from_yytoken(RCURL);      return RCURL; }
-"["  { make_token(LSQUARE);    set_yylval_from_yytoken(LSQUARE);    return LSQUARE; }
-"]"  { make_token(RSQUARE);    set_yylval_from_yytoken(RSQUARE);    return RSQUARE; }
-"<"  { make_token(LANGLE);     set_yylval_from_yytoken(LANGLE);     return LANGLE; }
-">"  { make_token(RANGLE);     set_yylval_from_yytoken(RANGLE);     return RANGLE; }
+"+"  { make_token(ADD);        set_yylval_from_yytoken(ADD);        free_yytoken(); return ADD; }
+"-"  { make_token(SUB);        set_yylval_from_yytoken(SUB);        free_yytoken(); return SUB; }
+"*"  { make_token(MUL);        set_yylval_from_yytoken(MUL);        free_yytoken(); return MUL; }
+"/"  { make_token(DIV);        set_yylval_from_yytoken(DIV);        free_yytoken(); return DIV; }
+"%"  { make_token(MOD);        set_yylval_from_yytoken(MOD);        free_yytoken(); return MOD; }
+"="  { make_token(ASSIGNMENT); set_yylval_from_yytoken(ASSIGNMENT); free_yytoken(); return ASSIGNMENT; }
+"!"  { make_token(NOT);        set_yylval_from_yytoken(NOT);        free_yytoken(); return NOT; }
+"?"  { make_token(QUEST);      set_yylval_from_yytoken(QUEST);      free_yytoken(); return QUEST; }
+";"  { make_token(SEMI);       set_yylval_from_yytoken(SEMI);       free_yytoken(); return SEMI; }
+":"  { make_token(COLON);      set_yylval_from_yytoken(COLON);      free_yytoken(); return COLON; }
+","  { make_token(COMMA);      set_yylval_from_yytoken(COMMA);      free_yytoken(); return COMMA; }
+"."  { make_token(DOT);        set_yylval_from_yytoken(DOT);        free_yytoken(); return DOT; }
+"("  { make_token(LPAREN);     set_yylval_from_yytoken(LPAREN);     free_yytoken(); return LPAREN; }
+")"  { make_token(RPAREN);     set_yylval_from_yytoken(RPAREN);     free_yytoken(); return RPAREN; }
+"{"  { make_token(LCURL);      set_yylval_from_yytoken(LCURL);      free_yytoken(); return LCURL; }
+"}"  { make_token(RCURL);      set_yylval_from_yytoken(RCURL);      free_yytoken(); return RCURL; }
+"["  { make_token(LSQUARE);    set_yylval_from_yytoken(LSQUARE);    free_yytoken(); return LSQUARE; }
+"]"  { make_token(RSQUARE);    set_yylval_from_yytoken(RSQUARE);    free_yytoken(); return RSQUARE; }
+"<"  { make_token(LANGLE);     set_yylval_from_yytoken(LANGLE);     free_yytoken(); return LANGLE; }
+">"  { make_token(RANGLE);     set_yylval_from_yytoken(RANGLE);     free_yytoken(); return RANGLE; }
 
 /* ===== Catch-all ===== */
 
 . {
     lexical_error("illegal character");
-    /* discard and continue */
 }
 
 <<EOF>> {
-    return 0;   /* IMPORTANT: bison expects 0 at EOF */
+    return 0;
 }
 
 %%
