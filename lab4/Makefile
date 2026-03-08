@@ -9,7 +9,7 @@ parser: k0gram.tab.c lex.yy.c main.o tree.o token.o
 k0gram.tab.c k0gram.tab.h: k0gram.y
 	bison -d -v k0gram.y
 
-lex.yy.c: k0lex.l k0gram.tab.h
+lex.yy.c: k0lex.l k0gram.tab.h tree.h
 	flex k0lex.l
 
 main.o: main.c tree.h
