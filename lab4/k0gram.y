@@ -21,7 +21,7 @@ extern int g_lex_errors;
 int     g_syntax_errors = 0;
 %}
 
-
+/* tree_t is already defined as an explicit structure in tree.h */
 %union {
     token_t       *tok;
     tree_t       *tree;
