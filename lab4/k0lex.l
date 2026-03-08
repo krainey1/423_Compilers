@@ -49,8 +49,17 @@ static void set_yylval_from_yytoken(int category) {
    yylval.tok = token_create(category,
                              (yytoken && yytoken->text) ? yytoken->text : yytext,
                              lineno);
+   printtok(yylval.tok);
 }
 
+/* extra print thing inside lexer to show info is present before parsing */
+static void printtok(token_t *t) {
+   if (!t) return;
+   printf("LEX TOKEN(%d) \"%s\" [line %d]\n",
+          t->code,
+          t->lexeme ? t->lexeme : "",
+          t->line);
+}
 
 static void free_yytoken(void) {
    if (!yytoken) return;
