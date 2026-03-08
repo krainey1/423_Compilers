@@ -596,16 +596,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   165,   165,   177,   187,   194,   202,   210,   222,   223,
-     228,   230,   238,   243,   252,   254,   256,   262,   271,   273,
-     285,   298,   299,   322,   323,   324,   325,   326,   327,   328,
-     329,   331,   340,   346,   353,   359,   366,   379,   384,   389,
-     394,   399,   404,   416,   422,   432,   441,   451,   453,   455,
-     457,   462,   463,   472,   474,   476,   481,   486,   491,   496,
-     501,   506,   508,   510,   512,   514,   516,   518,   520,   522,
-     524,   526,   528,   530,   532,   534,   536,   538,   540,   542,
-     544,   546,   548,   550,   555,   557,   570,   571,   572,   573,
-     574,   575,   576,   577
+       0,   152,   152,   161,   168,   175,   183,   191,   203,   204,
+     209,   211,   219,   224,   233,   235,   237,   243,   252,   254,
+     264,   275,   276,   287,   288,   289,   290,   291,   292,   293,
+     294,   296,   303,   309,   316,   322,   329,   340,   345,   350,
+     355,   360,   365,   375,   381,   391,   400,   410,   412,   414,
+     416,   421,   422,   428,   430,   432,   437,   442,   447,   452,
+     457,   462,   464,   466,   468,   470,   472,   474,   476,   478,
+     480,   482,   484,   486,   488,   490,   492,   494,   496,   498,
+     500,   502,   504,   506,   511,   513,   523,   524,   525,   526,
+     527,   528,   529,   530
 };
 #endif
 
@@ -1376,7 +1376,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: topLevelObject  */
-#line 166 "k0gram.y"
+#line 153 "k0gram.y"
         {
             (yyval.tree) = tree_node("program", 1, 1, (yyvsp[0].tree));
             g_root = (yyval.tree);
@@ -1385,13 +1385,13 @@ yyreduce:
     break;
 
   case 3: /* topLevelObject: functionDeclaration  */
-#line 178 "k0gram.y"
+#line 162 "k0gram.y"
         { (yyval.tree) = tree_node("topLevelObject", 1, 1, (yyvsp[0].tree)); }
 #line 1391 "k0gram.tab.c"
     break;
 
   case 4: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN block  */
-#line 188 "k0gram.y"
+#line 169 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionDeclaration", 1, 6,
                            tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
@@ -1402,7 +1402,7 @@ yyreduce:
     break;
 
   case 5: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type block  */
-#line 195 "k0gram.y"
+#line 176 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionDeclaration", 2, 8,
                            tree_leaf((yyvsp[-7].tok)), tree_leaf((yyvsp[-6].tok)),
@@ -1414,7 +1414,7 @@ yyreduce:
     break;
 
   case 6: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT expression  */
-#line 203 "k0gram.y"
+#line 184 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionDeclaration", 3, 7,
                            tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
@@ -1426,7 +1426,7 @@ yyreduce:
     break;
 
   case 7: /* functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression  */
-#line 211 "k0gram.y"
+#line 192 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionDeclaration", 4, 9,
                            tree_leaf((yyvsp[-8].tok)), tree_leaf((yyvsp[-7].tok)),
@@ -1438,25 +1438,25 @@ yyreduce:
     break;
 
   case 8: /* functionValueParameters: %empty  */
-#line 222 "k0gram.y"
+#line 203 "k0gram.y"
         { (yyval.tree) = NULL; }
 #line 1444 "k0gram.tab.c"
     break;
 
   case 9: /* functionValueParameters: functionValueParameterList  */
-#line 224 "k0gram.y"
+#line 205 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 1450 "k0gram.tab.c"
     break;
 
   case 10: /* functionValueParameterList: functionValueParameter  */
-#line 229 "k0gram.y"
+#line 210 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 1456 "k0gram.tab.c"
     break;
 
   case 11: /* functionValueParameterList: functionValueParameterList COMMA functionValueParameter  */
-#line 231 "k0gram.y"
+#line 212 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionValueParameterList", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1465,7 +1465,7 @@ yyreduce:
     break;
 
   case 12: /* functionValueParameter: IDENT COLON type  */
-#line 239 "k0gram.y"
+#line 220 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionValueParameter", 1, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1474,7 +1474,7 @@ yyreduce:
     break;
 
   case 13: /* functionValueParameter: IDENT COLON type ASSIGNMENT expression  */
-#line 244 "k0gram.y"
+#line 225 "k0gram.y"
         {
             (yyval.tree) = tree_node("functionValueParameter", 2, 5,
                            tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
@@ -1484,19 +1484,19 @@ yyreduce:
     break;
 
   case 14: /* type: IDENT  */
-#line 253 "k0gram.y"
+#line 234 "k0gram.y"
         { (yyval.tree) = tree_node("type", 1, 1, tree_leaf((yyvsp[0].tok))); }
 #line 1490 "k0gram.tab.c"
     break;
 
   case 15: /* type: IDENT QUEST  */
-#line 255 "k0gram.y"
+#line 236 "k0gram.y"
         { (yyval.tree) = tree_node("type", 2, 2, tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok))); }
 #line 1496 "k0gram.tab.c"
     break;
 
   case 16: /* type: IDENT LANGLE typeArgumentList RANGLE  */
-#line 257 "k0gram.y"
+#line 238 "k0gram.y"
         {
             (yyval.tree) = tree_node("type", 3, 4,
                            tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
@@ -1506,7 +1506,7 @@ yyreduce:
     break;
 
   case 17: /* type: IDENT LANGLE typeArgumentList RANGLE QUEST  */
-#line 263 "k0gram.y"
+#line 244 "k0gram.y"
         {
             (yyval.tree) = tree_node("type", 4, 5,
                            tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
@@ -1516,13 +1516,13 @@ yyreduce:
     break;
 
   case 18: /* typeArgumentList: type  */
-#line 272 "k0gram.y"
+#line 253 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 1522 "k0gram.tab.c"
     break;
 
   case 19: /* typeArgumentList: typeArgumentList COMMA type  */
-#line 274 "k0gram.y"
+#line 255 "k0gram.y"
         {
             (yyval.tree) = tree_node("typeArgumentList", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1531,7 +1531,7 @@ yyreduce:
     break;
 
   case 20: /* block: LCURL statements RCURL  */
-#line 286 "k0gram.y"
+#line 265 "k0gram.y"
         {
             (yyval.tree) = tree_node("block", 1, 3,
                            tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
@@ -1540,13 +1540,13 @@ yyreduce:
     break;
 
   case 21: /* statements: %empty  */
-#line 298 "k0gram.y"
+#line 275 "k0gram.y"
         { (yyval.tree) = NULL; }
 #line 1546 "k0gram.tab.c"
     break;
 
   case 22: /* statements: statements statement  */
-#line 300 "k0gram.y"
+#line 277 "k0gram.y"
         {
             if ((yyvsp[-1].tree) == NULL)
                 (yyval.tree) = (yyvsp[0].tree);
@@ -1557,61 +1557,61 @@ yyreduce:
     break;
 
   case 23: /* statement: varDeclaration  */
-#line 322 "k0gram.y"
+#line 287 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1563 "k0gram.tab.c"
     break;
 
   case 24: /* statement: functionDeclaration  */
-#line 323 "k0gram.y"
+#line 288 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1569 "k0gram.tab.c"
     break;
 
   case 25: /* statement: ifStatement  */
-#line 324 "k0gram.y"
+#line 289 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1575 "k0gram.tab.c"
     break;
 
   case 26: /* statement: whileStatement  */
-#line 325 "k0gram.y"
+#line 290 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1581 "k0gram.tab.c"
     break;
 
   case 27: /* statement: forStatement  */
-#line 326 "k0gram.y"
+#line 291 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1587 "k0gram.tab.c"
     break;
 
   case 28: /* statement: jumpStatement  */
-#line 327 "k0gram.y"
+#line 292 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1593 "k0gram.tab.c"
     break;
 
   case 29: /* statement: assignment  */
-#line 328 "k0gram.y"
+#line 293 "k0gram.y"
                             { (yyval.tree) = (yyvsp[0].tree); }
 #line 1599 "k0gram.tab.c"
     break;
 
   case 30: /* statement: expression SEMI  */
-#line 330 "k0gram.y"
+#line 295 "k0gram.y"
         { (yyval.tree) = tree_node("exprStatement", 1, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
 #line 1605 "k0gram.tab.c"
     break;
 
   case 31: /* statement: expression  */
-#line 332 "k0gram.y"
+#line 297 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 1611 "k0gram.tab.c"
     break;
 
   case 32: /* varDeclaration: VAL IDENT ASSIGNMENT expression  */
-#line 341 "k0gram.y"
+#line 304 "k0gram.y"
         {
             (yyval.tree) = tree_node("varDeclaration", 1, 4,
                            tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
@@ -1621,7 +1621,7 @@ yyreduce:
     break;
 
   case 33: /* varDeclaration: VAL IDENT COLON type ASSIGNMENT expression  */
-#line 347 "k0gram.y"
+#line 310 "k0gram.y"
         {
             (yyval.tree) = tree_node("varDeclaration", 2, 6,
                            tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
@@ -1632,7 +1632,7 @@ yyreduce:
     break;
 
   case 34: /* varDeclaration: VAR IDENT ASSIGNMENT expression  */
-#line 354 "k0gram.y"
+#line 317 "k0gram.y"
         {
             (yyval.tree) = tree_node("varDeclaration", 3, 4,
                            tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
@@ -1642,7 +1642,7 @@ yyreduce:
     break;
 
   case 35: /* varDeclaration: VAR IDENT COLON type ASSIGNMENT expression  */
-#line 360 "k0gram.y"
+#line 323 "k0gram.y"
         {
             (yyval.tree) = tree_node("varDeclaration", 4, 6,
                            tree_leaf((yyvsp[-5].tok)), tree_leaf((yyvsp[-4].tok)),
@@ -1653,7 +1653,7 @@ yyreduce:
     break;
 
   case 36: /* varDeclaration: VAR IDENT COLON type  */
-#line 367 "k0gram.y"
+#line 330 "k0gram.y"
         {
             (yyval.tree) = tree_node("varDeclaration", 5, 4,
                            tree_leaf((yyvsp[-3].tok)), tree_leaf((yyvsp[-2].tok)),
@@ -1663,7 +1663,7 @@ yyreduce:
     break;
 
   case 37: /* assignment: IDENT ASSIGNMENT expression  */
-#line 380 "k0gram.y"
+#line 341 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 1, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1672,7 +1672,7 @@ yyreduce:
     break;
 
   case 38: /* assignment: IDENT ADD_ASSIGN expression  */
-#line 385 "k0gram.y"
+#line 346 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 2, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1681,7 +1681,7 @@ yyreduce:
     break;
 
   case 39: /* assignment: IDENT SUB_ASSIGN expression  */
-#line 390 "k0gram.y"
+#line 351 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 3, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1690,7 +1690,7 @@ yyreduce:
     break;
 
   case 40: /* assignment: IDENT MUL_ASSIGN expression  */
-#line 395 "k0gram.y"
+#line 356 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 4, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1699,7 +1699,7 @@ yyreduce:
     break;
 
   case 41: /* assignment: IDENT DIV_ASSIGN expression  */
-#line 400 "k0gram.y"
+#line 361 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 5, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1708,7 +1708,7 @@ yyreduce:
     break;
 
   case 42: /* assignment: IDENT MOD_ASSIGN expression  */
-#line 405 "k0gram.y"
+#line 366 "k0gram.y"
         {
             (yyval.tree) = tree_node("assignment", 6, 3,
                            tree_leaf((yyvsp[-2].tok)), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1717,7 +1717,7 @@ yyreduce:
     break;
 
   case 43: /* ifStatement: IF LPAREN expression RPAREN controlStructureBody  */
-#line 417 "k0gram.y"
+#line 376 "k0gram.y"
         {
             (yyval.tree) = tree_node("ifStatement", 1, 5,
                            tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
@@ -1727,7 +1727,7 @@ yyreduce:
     break;
 
   case 44: /* ifStatement: IF LPAREN expression RPAREN controlStructureBody ELSE controlStructureBody  */
-#line 423 "k0gram.y"
+#line 382 "k0gram.y"
         {
             (yyval.tree) = tree_node("ifStatement", 2, 7,
                            tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
@@ -1738,7 +1738,7 @@ yyreduce:
     break;
 
   case 45: /* whileStatement: WHILE LPAREN expression RPAREN controlStructureBody  */
-#line 433 "k0gram.y"
+#line 392 "k0gram.y"
         {
             (yyval.tree) = tree_node("whileStatement", 1, 5,
                            tree_leaf((yyvsp[-4].tok)), tree_leaf((yyvsp[-3].tok)),
@@ -1748,7 +1748,7 @@ yyreduce:
     break;
 
   case 46: /* forStatement: FOR LPAREN IDENT IN expression RPAREN controlStructureBody  */
-#line 442 "k0gram.y"
+#line 401 "k0gram.y"
         {
             (yyval.tree) = tree_node("forStatement", 1, 7,
                            tree_leaf((yyvsp[-6].tok)), tree_leaf((yyvsp[-5].tok)),
@@ -1759,55 +1759,55 @@ yyreduce:
     break;
 
   case 47: /* jumpStatement: RETURN  */
-#line 452 "k0gram.y"
+#line 411 "k0gram.y"
         { (yyval.tree) = tree_node("jumpStatement", 1, 1, tree_leaf((yyvsp[0].tok))); }
 #line 1765 "k0gram.tab.c"
     break;
 
   case 48: /* jumpStatement: RETURN expression  */
-#line 454 "k0gram.y"
+#line 413 "k0gram.y"
         { (yyval.tree) = tree_node("jumpStatement", 2, 2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1771 "k0gram.tab.c"
     break;
 
   case 49: /* jumpStatement: BREAK  */
-#line 456 "k0gram.y"
+#line 415 "k0gram.y"
         { (yyval.tree) = tree_node("jumpStatement", 3, 1, tree_leaf((yyvsp[0].tok))); }
 #line 1777 "k0gram.tab.c"
     break;
 
   case 50: /* jumpStatement: CONTINUE  */
-#line 458 "k0gram.y"
+#line 417 "k0gram.y"
         { (yyval.tree) = tree_node("jumpStatement", 4, 1, tree_leaf((yyvsp[0].tok))); }
 #line 1783 "k0gram.tab.c"
     break;
 
   case 51: /* controlStructureBody: block  */
-#line 462 "k0gram.y"
+#line 421 "k0gram.y"
                 { (yyval.tree) = (yyvsp[0].tree); }
 #line 1789 "k0gram.tab.c"
     break;
 
   case 52: /* controlStructureBody: statement  */
-#line 463 "k0gram.y"
+#line 422 "k0gram.y"
                 { (yyval.tree) = (yyvsp[0].tree); }
 #line 1795 "k0gram.tab.c"
     break;
 
   case 53: /* expression: literal  */
-#line 473 "k0gram.y"
+#line 429 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 1801 "k0gram.tab.c"
     break;
 
   case 54: /* expression: IDENT  */
-#line 475 "k0gram.y"
+#line 431 "k0gram.y"
         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 1807 "k0gram.tab.c"
     break;
 
   case 55: /* expression: expression LPAREN RPAREN  */
-#line 477 "k0gram.y"
+#line 433 "k0gram.y"
         {
             (yyval.tree) = tree_node("callExpr", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
@@ -1816,7 +1816,7 @@ yyreduce:
     break;
 
   case 56: /* expression: expression LPAREN argumentList RPAREN  */
-#line 482 "k0gram.y"
+#line 438 "k0gram.y"
         {
             (yyval.tree) = tree_node("callExpr", 2, 4,
                            (yyvsp[-3].tree), tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
@@ -1825,7 +1825,7 @@ yyreduce:
     break;
 
   case 57: /* expression: expression LSQUARE expression RSQUARE  */
-#line 487 "k0gram.y"
+#line 443 "k0gram.y"
         {
             (yyval.tree) = tree_node("indexExpr", 1, 4,
                            (yyvsp[-3].tree), tree_leaf((yyvsp[-2].tok)), (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok)));
@@ -1834,7 +1834,7 @@ yyreduce:
     break;
 
   case 58: /* expression: expression DOT IDENT  */
-#line 492 "k0gram.y"
+#line 448 "k0gram.y"
         {
             (yyval.tree) = tree_node("memberExpr", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
@@ -1843,7 +1843,7 @@ yyreduce:
     break;
 
   case 59: /* expression: expression SAFE_CALL IDENT  */
-#line 497 "k0gram.y"
+#line 453 "k0gram.y"
         {
             (yyval.tree) = tree_node("safeMemberExpr", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), tree_leaf((yyvsp[0].tok)));
@@ -1852,7 +1852,7 @@ yyreduce:
     break;
 
   case 60: /* expression: expression AS type  */
-#line 502 "k0gram.y"
+#line 458 "k0gram.y"
         {
             (yyval.tree) = tree_node("castExpr", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -1861,151 +1861,151 @@ yyreduce:
     break;
 
   case 61: /* expression: expression ADD expression  */
-#line 507 "k0gram.y"
+#line 463 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1867 "k0gram.tab.c"
     break;
 
   case 62: /* expression: expression SUB expression  */
-#line 509 "k0gram.y"
+#line 465 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 2,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1873 "k0gram.tab.c"
     break;
 
   case 63: /* expression: expression MUL expression  */
-#line 511 "k0gram.y"
+#line 467 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 3,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1879 "k0gram.tab.c"
     break;
 
   case 64: /* expression: expression DIV expression  */
-#line 513 "k0gram.y"
+#line 469 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 4,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1885 "k0gram.tab.c"
     break;
 
   case 65: /* expression: expression MOD expression  */
-#line 515 "k0gram.y"
+#line 471 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 5,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1891 "k0gram.tab.c"
     break;
 
   case 66: /* expression: SUB expression  */
-#line 517 "k0gram.y"
+#line 473 "k0gram.y"
         { (yyval.tree) = tree_node("unaryExpr",  1,  2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1897 "k0gram.tab.c"
     break;
 
   case 67: /* expression: NOT expression  */
-#line 519 "k0gram.y"
+#line 475 "k0gram.y"
         { (yyval.tree) = tree_node("unaryExpr",  2,  2, tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1903 "k0gram.tab.c"
     break;
 
   case 68: /* expression: expression INCR  */
-#line 521 "k0gram.y"
+#line 477 "k0gram.y"
         { (yyval.tree) = tree_node("postfixExpr", 1, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
 #line 1909 "k0gram.tab.c"
     break;
 
   case 69: /* expression: expression DECR  */
-#line 523 "k0gram.y"
+#line 479 "k0gram.y"
         { (yyval.tree) = tree_node("postfixExpr", 2, 2, (yyvsp[-1].tree), tree_leaf((yyvsp[0].tok))); }
 #line 1915 "k0gram.tab.c"
     break;
 
   case 70: /* expression: expression EQ expression  */
-#line 525 "k0gram.y"
+#line 481 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 6,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1921 "k0gram.tab.c"
     break;
 
   case 71: /* expression: expression NEQ expression  */
-#line 527 "k0gram.y"
+#line 483 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 7,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1927 "k0gram.tab.c"
     break;
 
   case 72: /* expression: expression LANGLE expression  */
-#line 529 "k0gram.y"
+#line 485 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 8,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1933 "k0gram.tab.c"
     break;
 
   case 73: /* expression: expression RANGLE expression  */
-#line 531 "k0gram.y"
+#line 487 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 9,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1939 "k0gram.tab.c"
     break;
 
   case 74: /* expression: expression LTE expression  */
-#line 533 "k0gram.y"
+#line 489 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 10, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1945 "k0gram.tab.c"
     break;
 
   case 75: /* expression: expression GTE expression  */
-#line 535 "k0gram.y"
+#line 491 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 11, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1951 "k0gram.tab.c"
     break;
 
   case 76: /* expression: expression REF_EQ expression  */
-#line 537 "k0gram.y"
+#line 493 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 12, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1957 "k0gram.tab.c"
     break;
 
   case 77: /* expression: expression REF_NEQ expression  */
-#line 539 "k0gram.y"
+#line 495 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 13, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1963 "k0gram.tab.c"
     break;
 
   case 78: /* expression: expression AND expression  */
-#line 541 "k0gram.y"
+#line 497 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 14, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1969 "k0gram.tab.c"
     break;
 
   case 79: /* expression: expression OR expression  */
-#line 543 "k0gram.y"
+#line 499 "k0gram.y"
         { (yyval.tree) = tree_node("binaryExpr", 15, 3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1975 "k0gram.tab.c"
     break;
 
   case 80: /* expression: expression RANGE expression  */
-#line 545 "k0gram.y"
+#line 501 "k0gram.y"
         { (yyval.tree) = tree_node("rangeExpr",  1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1981 "k0gram.tab.c"
     break;
 
   case 81: /* expression: expression RANGE_UNTIL expression  */
-#line 547 "k0gram.y"
+#line 503 "k0gram.y"
         { (yyval.tree) = tree_node("rangeExpr",  2,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1987 "k0gram.tab.c"
     break;
 
   case 82: /* expression: expression ELVIS expression  */
-#line 549 "k0gram.y"
+#line 505 "k0gram.y"
         { (yyval.tree) = tree_node("elvisExpr",  1,  3, (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree)); }
 #line 1993 "k0gram.tab.c"
     break;
 
   case 83: /* expression: LPAREN expression RPAREN  */
-#line 551 "k0gram.y"
+#line 507 "k0gram.y"
         { (yyval.tree) = (yyvsp[-1].tree); }
 #line 1999 "k0gram.tab.c"
     break;
 
   case 84: /* argumentList: expression  */
-#line 556 "k0gram.y"
+#line 512 "k0gram.y"
         { (yyval.tree) = (yyvsp[0].tree); }
 #line 2005 "k0gram.tab.c"
     break;
 
   case 85: /* argumentList: argumentList COMMA expression  */
-#line 558 "k0gram.y"
+#line 514 "k0gram.y"
         {
             (yyval.tree) = tree_node("argumentList", 1, 3,
                            (yyvsp[-2].tree), tree_leaf((yyvsp[-1].tok)), (yyvsp[0].tree));
@@ -2014,49 +2014,49 @@ yyreduce:
     break;
 
   case 86: /* literal: INTEGERLITERAL  */
-#line 570 "k0gram.y"
+#line 523 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2020 "k0gram.tab.c"
     break;
 
   case 87: /* literal: LONGLITERAL  */
-#line 571 "k0gram.y"
+#line 524 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2026 "k0gram.tab.c"
     break;
 
   case 88: /* literal: REALLITERAL  */
-#line 572 "k0gram.y"
+#line 525 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2032 "k0gram.tab.c"
     break;
 
   case 89: /* literal: DOUBLELITERAL  */
-#line 573 "k0gram.y"
+#line 526 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2038 "k0gram.tab.c"
     break;
 
   case 90: /* literal: BOOLEANLITERAL  */
-#line 574 "k0gram.y"
+#line 527 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2044 "k0gram.tab.c"
     break;
 
   case 91: /* literal: CHARACTERLITERAL  */
-#line 575 "k0gram.y"
+#line 528 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2050 "k0gram.tab.c"
     break;
 
   case 92: /* literal: STRINGLITERAL  */
-#line 576 "k0gram.y"
+#line 529 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2056 "k0gram.tab.c"
     break;
 
   case 93: /* literal: NULLLITERAL  */
-#line 577 "k0gram.y"
+#line 530 "k0gram.y"
                         { (yyval.tree) = tree_leaf((yyvsp[0].tok)); }
 #line 2062 "k0gram.tab.c"
     break;
@@ -2255,7 +2255,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 580 "k0gram.y"
+#line 533 "k0gram.y"
 
 
 void yyerror(const char *s) {
