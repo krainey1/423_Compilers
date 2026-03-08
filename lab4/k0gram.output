@@ -1,0 +1,4447 @@
+Terminals unused in grammar
+
+    WHEN
+    DO
+    IMPORT
+    CONST
+    ARROW
+    DOUBLE_COLON
+
+
+State 15 conflicts: 1 shift/reduce
+State 37 conflicts: 2 shift/reduce
+State 44 conflicts: 1 shift/reduce
+State 45 conflicts: 1 shift/reduce
+State 77 conflicts: 12 shift/reduce
+State 90 conflicts: 2 shift/reduce
+State 96 conflicts: 1 shift/reduce
+State 97 conflicts: 1 shift/reduce
+State 98 conflicts: 1 shift/reduce
+State 99 conflicts: 1 shift/reduce
+State 100 conflicts: 1 shift/reduce
+State 101 conflicts: 1 shift/reduce
+State 102 conflicts: 1 shift/reduce
+State 103 conflicts: 1 shift/reduce
+State 104 conflicts: 1 shift/reduce
+State 105 conflicts: 1 shift/reduce
+State 106 conflicts: 1 shift/reduce
+State 107 conflicts: 1 shift/reduce
+State 108 conflicts: 1 shift/reduce
+State 110 conflicts: 25 shift/reduce
+State 111 conflicts: 1 shift/reduce
+State 112 conflicts: 1 shift/reduce
+State 118 conflicts: 1 shift/reduce
+State 119 conflicts: 1 shift/reduce
+State 126 conflicts: 2 shift/reduce
+State 134 conflicts: 2 shift/reduce
+State 147 conflicts: 2 shift/reduce
+State 148 conflicts: 2 shift/reduce
+State 149 conflicts: 2 shift/reduce
+State 150 conflicts: 2 shift/reduce
+State 151 conflicts: 2 shift/reduce
+State 152 conflicts: 2 shift/reduce
+State 154 conflicts: 2 shift/reduce
+State 156 conflicts: 2 shift/reduce
+State 165 conflicts: 1 shift/reduce
+State 168 conflicts: 2 shift/reduce
+State 169 conflicts: 2 shift/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: topLevelObject
+
+    2 topLevelObject: functionDeclaration
+
+    3 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN block
+    4                    | FUN IDENT LPAREN functionValueParameters RPAREN COLON type block
+    5                    | FUN IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT expression
+    6                    | FUN IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression
+
+    7 functionValueParameters: ε
+    8                        | functionValueParameterList
+
+    9 functionValueParameterList: functionValueParameter
+   10                           | functionValueParameterList COMMA functionValueParameter
+
+   11 functionValueParameter: IDENT COLON type
+   12                       | IDENT COLON type ASSIGNMENT expression
+
+   13 type: IDENT
+   14     | IDENT QUEST
+   15     | IDENT LANGLE typeArgumentList RANGLE
+   16     | IDENT LANGLE typeArgumentList RANGLE QUEST
+
+   17 typeArgumentList: type
+   18                 | typeArgumentList COMMA type
+
+   19 block: LCURL statements RCURL
+
+   20 statements: ε
+   21           | statements statement
+
+   22 statement: varDeclaration
+   23          | functionDeclaration
+   24          | ifStatement
+   25          | whileStatement
+   26          | forStatement
+   27          | jumpStatement
+   28          | assignment
+   29          | expression SEMI
+   30          | expression
+
+   31 varDeclaration: VAL IDENT ASSIGNMENT expression
+   32               | VAL IDENT COLON type ASSIGNMENT expression
+   33               | VAR IDENT ASSIGNMENT expression
+   34               | VAR IDENT COLON type ASSIGNMENT expression
+   35               | VAR IDENT COLON type
+
+   36 assignment: IDENT ASSIGNMENT expression
+   37           | IDENT ADD_ASSIGN expression
+   38           | IDENT SUB_ASSIGN expression
+   39           | IDENT MUL_ASSIGN expression
+   40           | IDENT DIV_ASSIGN expression
+   41           | IDENT MOD_ASSIGN expression
+
+   42 ifStatement: IF LPAREN expression RPAREN controlStructureBody
+   43            | IF LPAREN expression RPAREN controlStructureBody ELSE controlStructureBody
+
+   44 whileStatement: WHILE LPAREN expression RPAREN controlStructureBody
+
+   45 forStatement: FOR LPAREN IDENT IN expression RPAREN controlStructureBody
+
+   46 jumpStatement: RETURN
+   47              | RETURN expression
+   48              | BREAK
+   49              | CONTINUE
+
+   50 controlStructureBody: block
+   51                     | statement
+
+   52 expression: literal
+   53           | IDENT
+   54           | expression LPAREN RPAREN
+   55           | expression LPAREN argumentList RPAREN
+   56           | expression LSQUARE expression RSQUARE
+   57           | expression DOT IDENT
+   58           | expression SAFE_CALL IDENT
+   59           | expression AS type
+   60           | expression ADD expression
+   61           | expression SUB expression
+   62           | expression MUL expression
+   63           | expression DIV expression
+   64           | expression MOD expression
+   65           | SUB expression
+   66           | NOT expression
+   67           | expression INCR
+   68           | expression DECR
+   69           | expression EQ expression
+   70           | expression NEQ expression
+   71           | expression LANGLE expression
+   72           | expression RANGLE expression
+   73           | expression LTE expression
+   74           | expression GTE expression
+   75           | expression REF_EQ expression
+   76           | expression REF_NEQ expression
+   77           | expression AND expression
+   78           | expression OR expression
+   79           | expression RANGE expression
+   80           | expression RANGE_UNTIL expression
+   81           | expression ELVIS expression
+   82           | LPAREN expression RPAREN
+
+   83 argumentList: expression
+   84             | argumentList COMMA expression
+
+   85 literal: INTEGERLITERAL
+   86        | LONGLITERAL
+   87        | REALLITERAL
+   88        | DOUBLELITERAL
+   89        | BOOLEANLITERAL
+   90        | CHARACTERLITERAL
+   91        | STRINGLITERAL
+   92        | NULLLITERAL
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    FUN <tok> (258) 3 4 5 6
+    VAL <tok> (259) 31 32
+    VAR <tok> (260) 33 34 35
+    IF <tok> (261) 42 43
+    ELSE <tok> (262) 43
+    WHILE <tok> (263) 44
+    FOR <tok> (264) 45
+    RETURN <tok> (265) 46 47
+    BREAK <tok> (266) 48
+    CONTINUE <tok> (267) 49
+    WHEN <tok> (268)
+    IN <tok> (269) 45
+    DO <tok> (270)
+    IMPORT <tok> (271)
+    CONST <tok> (272)
+    INTEGERLITERAL <tok> (273) 85
+    LONGLITERAL <tok> (274) 86
+    REALLITERAL <tok> (275) 87
+    DOUBLELITERAL <tok> (276) 88
+    BOOLEANLITERAL <tok> (277) 89
+    CHARACTERLITERAL <tok> (278) 90
+    STRINGLITERAL <tok> (279) 91
+    NULLLITERAL <tok> (280) 92
+    IDENT <tok> (281) 3 4 5 6 11 12 13 14 15 16 31 32 33 34 35 36 37 38 39 40 41 45 53 57 58
+    ASSIGNMENT <tok> (282) 5 6 12 31 32 33 34 36
+    ADD_ASSIGN <tok> (283) 37
+    SUB_ASSIGN <tok> (284) 38
+    MUL_ASSIGN <tok> (285) 39
+    DIV_ASSIGN <tok> (286) 40
+    MOD_ASSIGN <tok> (287) 41
+    ADD <tok> (288) 60
+    SUB <tok> (289) 61 65
+    MUL <tok> (290) 62
+    DIV <tok> (291) 63
+    MOD <tok> (292) 64
+    INCR <tok> (293) 67
+    DECR <tok> (294) 68
+    EQ <tok> (295) 69
+    NEQ <tok> (296) 70
+    GTE <tok> (297) 74
+    LTE <tok> (298) 73
+    REF_EQ <tok> (299) 75
+    REF_NEQ <tok> (300) 76
+    AND <tok> (301) 77
+    OR <tok> (302) 78
+    NOT <tok> (303) 66
+    SAFE_CALL <tok> (304) 58
+    ELVIS <tok> (305) 81
+    QUEST <tok> (306) 14 16
+    RANGE <tok> (307) 79
+    RANGE_UNTIL <tok> (308) 80
+    AS <tok> (309) 59
+    LPAREN <tok> (310) 3 4 5 6 42 43 44 45 54 55 82
+    RPAREN <tok> (311) 3 4 5 6 42 43 44 45 54 55 82
+    LCURL <tok> (312) 19
+    RCURL <tok> (313) 19
+    LSQUARE <tok> (314) 56
+    RSQUARE <tok> (315) 56
+    LANGLE <tok> (316) 15 16 71
+    RANGLE <tok> (317) 15 16 72
+    COMMA <tok> (318) 10 18 84
+    DOT <tok> (319) 57
+    COLON <tok> (320) 4 6 11 12 32 34 35
+    SEMI <tok> (321) 29
+    ARROW <tok> (322)
+    DOUBLE_COLON <tok> (323)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (69)
+        on left: 0
+    program <tree> (70)
+        on left: 1
+        on right: 0
+    topLevelObject <tree> (71)
+        on left: 2
+        on right: 1
+    functionDeclaration <tree> (72)
+        on left: 3 4 5 6
+        on right: 2 23
+    functionValueParameters <tree> (73)
+        on left: 7 8
+        on right: 3 4 5 6
+    functionValueParameterList <tree> (74)
+        on left: 9 10
+        on right: 8 10
+    functionValueParameter <tree> (75)
+        on left: 11 12
+        on right: 9 10
+    type <tree> (76)
+        on left: 13 14 15 16
+        on right: 4 6 11 12 17 18 32 34 35 59
+    typeArgumentList <tree> (77)
+        on left: 17 18
+        on right: 15 16 18
+    block <tree> (78)
+        on left: 19
+        on right: 3 4 50
+    statements <tree> (79)
+        on left: 20 21
+        on right: 19 21
+    statement <tree> (80)
+        on left: 22 23 24 25 26 27 28 29 30
+        on right: 21 51
+    varDeclaration <tree> (81)
+        on left: 31 32 33 34 35
+        on right: 22
+    assignment <tree> (82)
+        on left: 36 37 38 39 40 41
+        on right: 28
+    ifStatement <tree> (83)
+        on left: 42 43
+        on right: 24
+    whileStatement <tree> (84)
+        on left: 44
+        on right: 25
+    forStatement <tree> (85)
+        on left: 45
+        on right: 26
+    jumpStatement <tree> (86)
+        on left: 46 47 48 49
+        on right: 27
+    controlStructureBody <tree> (87)
+        on left: 50 51
+        on right: 42 43 44 45
+    expression <tree> (88)
+        on left: 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82
+        on right: 5 6 12 29 30 31 32 33 34 36 37 38 39 40 41 42 43 44 45 47 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84
+    argumentList <tree> (89)
+        on left: 83 84
+        on right: 55 84
+    literal <tree> (90)
+        on left: 85 86 87 88 89 90 91 92
+        on right: 52
+
+
+State 0
+
+    0 $accept: • program $end
+
+    FUN  shift, and go to state 1
+
+    program              go to state 2
+    topLevelObject       go to state 3
+    functionDeclaration  go to state 4
+
+
+State 1
+
+    3 functionDeclaration: FUN • IDENT LPAREN functionValueParameters RPAREN block
+    4                    | FUN • IDENT LPAREN functionValueParameters RPAREN COLON type block
+    5                    | FUN • IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT expression
+    6                    | FUN • IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 5
+
+
+State 2
+
+    0 $accept: program • $end
+
+    $end  shift, and go to state 6
+
+
+State 3
+
+    1 program: topLevelObject •
+
+    $default  reduce using rule 1 (program)
+
+
+State 4
+
+    2 topLevelObject: functionDeclaration •
+
+    $default  reduce using rule 2 (topLevelObject)
+
+
+State 5
+
+    3 functionDeclaration: FUN IDENT • LPAREN functionValueParameters RPAREN block
+    4                    | FUN IDENT • LPAREN functionValueParameters RPAREN COLON type block
+    5                    | FUN IDENT • LPAREN functionValueParameters RPAREN ASSIGNMENT expression
+    6                    | FUN IDENT • LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression
+
+    LPAREN  shift, and go to state 7
+
+
+State 6
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 7
+
+    3 functionDeclaration: FUN IDENT LPAREN • functionValueParameters RPAREN block
+    4                    | FUN IDENT LPAREN • functionValueParameters RPAREN COLON type block
+    5                    | FUN IDENT LPAREN • functionValueParameters RPAREN ASSIGNMENT expression
+    6                    | FUN IDENT LPAREN • functionValueParameters RPAREN COLON type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 8
+
+    $default  reduce using rule 7 (functionValueParameters)
+
+    functionValueParameters     go to state 9
+    functionValueParameterList  go to state 10
+    functionValueParameter      go to state 11
+
+
+State 8
+
+   11 functionValueParameter: IDENT • COLON type
+   12                       | IDENT • COLON type ASSIGNMENT expression
+
+    COLON  shift, and go to state 12
+
+
+State 9
+
+    3 functionDeclaration: FUN IDENT LPAREN functionValueParameters • RPAREN block
+    4                    | FUN IDENT LPAREN functionValueParameters • RPAREN COLON type block
+    5                    | FUN IDENT LPAREN functionValueParameters • RPAREN ASSIGNMENT expression
+    6                    | FUN IDENT LPAREN functionValueParameters • RPAREN COLON type ASSIGNMENT expression
+
+    RPAREN  shift, and go to state 13
+
+
+State 10
+
+    8 functionValueParameters: functionValueParameterList •
+   10 functionValueParameterList: functionValueParameterList • COMMA functionValueParameter
+
+    COMMA  shift, and go to state 14
+
+    $default  reduce using rule 8 (functionValueParameters)
+
+
+State 11
+
+    9 functionValueParameterList: functionValueParameter •
+
+    $default  reduce using rule 9 (functionValueParameterList)
+
+
+State 12
+
+   11 functionValueParameter: IDENT COLON • type
+   12                       | IDENT COLON • type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 16
+
+
+State 13
+
+    3 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN • block
+    4                    | FUN IDENT LPAREN functionValueParameters RPAREN • COLON type block
+    5                    | FUN IDENT LPAREN functionValueParameters RPAREN • ASSIGNMENT expression
+    6                    | FUN IDENT LPAREN functionValueParameters RPAREN • COLON type ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 17
+    LCURL       shift, and go to state 18
+    COLON       shift, and go to state 19
+
+    block  go to state 20
+
+
+State 14
+
+   10 functionValueParameterList: functionValueParameterList COMMA • functionValueParameter
+
+    IDENT  shift, and go to state 8
+
+    functionValueParameter  go to state 21
+
+
+State 15
+
+   13 type: IDENT •
+   14     | IDENT • QUEST
+   15     | IDENT • LANGLE typeArgumentList RANGLE
+   16     | IDENT • LANGLE typeArgumentList RANGLE QUEST
+
+    QUEST   shift, and go to state 22
+    LANGLE  shift, and go to state 23
+
+    LANGLE    [reduce using rule 13 (type)]
+    $default  reduce using rule 13 (type)
+
+
+State 16
+
+   11 functionValueParameter: IDENT COLON type •
+   12                       | IDENT COLON type • ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 24
+
+    $default  reduce using rule 11 (functionValueParameter)
+
+
+State 17
+
+    5 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 37
+    literal     go to state 38
+
+
+State 18
+
+   19 block: LCURL • statements RCURL
+
+    $default  reduce using rule 20 (statements)
+
+    statements  go to state 39
+
+
+State 19
+
+    4 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON • type block
+    6                    | FUN IDENT LPAREN functionValueParameters RPAREN COLON • type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 40
+
+
+State 20
+
+    3 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN block •
+
+    $default  reduce using rule 3 (functionDeclaration)
+
+
+State 21
+
+   10 functionValueParameterList: functionValueParameterList COMMA functionValueParameter •
+
+    $default  reduce using rule 10 (functionValueParameterList)
+
+
+State 22
+
+   14 type: IDENT QUEST •
+
+    $default  reduce using rule 14 (type)
+
+
+State 23
+
+   15 type: IDENT LANGLE • typeArgumentList RANGLE
+   16     | IDENT LANGLE • typeArgumentList RANGLE QUEST
+
+    IDENT  shift, and go to state 15
+
+    type              go to state 41
+    typeArgumentList  go to state 42
+
+
+State 24
+
+   12 functionValueParameter: IDENT COLON type ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 43
+    literal     go to state 38
+
+
+State 25
+
+   85 literal: INTEGERLITERAL •
+
+    $default  reduce using rule 85 (literal)
+
+
+State 26
+
+   86 literal: LONGLITERAL •
+
+    $default  reduce using rule 86 (literal)
+
+
+State 27
+
+   87 literal: REALLITERAL •
+
+    $default  reduce using rule 87 (literal)
+
+
+State 28
+
+   88 literal: DOUBLELITERAL •
+
+    $default  reduce using rule 88 (literal)
+
+
+State 29
+
+   89 literal: BOOLEANLITERAL •
+
+    $default  reduce using rule 89 (literal)
+
+
+State 30
+
+   90 literal: CHARACTERLITERAL •
+
+    $default  reduce using rule 90 (literal)
+
+
+State 31
+
+   91 literal: STRINGLITERAL •
+
+    $default  reduce using rule 91 (literal)
+
+
+State 32
+
+   92 literal: NULLLITERAL •
+
+    $default  reduce using rule 92 (literal)
+
+
+State 33
+
+   53 expression: IDENT •
+
+    $default  reduce using rule 53 (expression)
+
+
+State 34
+
+   65 expression: SUB • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 44
+    literal     go to state 38
+
+
+State 35
+
+   66 expression: NOT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 45
+    literal     go to state 38
+
+
+State 36
+
+   82 expression: LPAREN • expression RPAREN
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 46
+    literal     go to state 38
+
+
+State 37
+
+    5 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 5 (functionDeclaration)]
+    LPAREN    [reduce using rule 5 (functionDeclaration)]
+    $default  reduce using rule 5 (functionDeclaration)
+
+
+State 38
+
+   52 expression: literal •
+
+    $default  reduce using rule 52 (expression)
+
+
+State 39
+
+   19 block: LCURL statements • RCURL
+   21 statements: statements • statement
+
+    FUN               shift, and go to state 1
+    VAL               shift, and go to state 72
+    VAR               shift, and go to state 73
+    IF                shift, and go to state 74
+    WHILE             shift, and go to state 75
+    FOR               shift, and go to state 76
+    RETURN            shift, and go to state 77
+    BREAK             shift, and go to state 78
+    CONTINUE          shift, and go to state 79
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 80
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    RCURL             shift, and go to state 81
+
+    functionDeclaration  go to state 82
+    statement            go to state 83
+    varDeclaration       go to state 84
+    assignment           go to state 85
+    ifStatement          go to state 86
+    whileStatement       go to state 87
+    forStatement         go to state 88
+    jumpStatement        go to state 89
+    expression           go to state 90
+    literal              go to state 38
+
+
+State 40
+
+    4 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type • block
+    6                    | FUN IDENT LPAREN functionValueParameters RPAREN COLON type • ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 91
+    LCURL       shift, and go to state 18
+
+    block  go to state 92
+
+
+State 41
+
+   17 typeArgumentList: type •
+
+    $default  reduce using rule 17 (typeArgumentList)
+
+
+State 42
+
+   15 type: IDENT LANGLE typeArgumentList • RANGLE
+   16     | IDENT LANGLE typeArgumentList • RANGLE QUEST
+   18 typeArgumentList: typeArgumentList • COMMA type
+
+    RANGLE  shift, and go to state 93
+    COMMA   shift, and go to state 94
+
+
+State 43
+
+   12 functionValueParameter: IDENT COLON type ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    $default  reduce using rule 12 (functionValueParameter)
+
+
+State 44
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   65           | SUB expression •
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    MUL        shift, and go to state 49
+    DIV        shift, and go to state 50
+    MOD        shift, and go to state 51
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 65 (expression)]
+    $default  reduce using rule 65 (expression)
+
+
+State 45
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   66           | NOT expression •
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 66 (expression)]
+    $default  reduce using rule 66 (expression)
+
+
+State 46
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+   82           | LPAREN expression • RPAREN
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    RPAREN       shift, and go to state 95
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+
+State 47
+
+   60 expression: expression ADD • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 96
+    literal     go to state 38
+
+
+State 48
+
+   61 expression: expression SUB • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 97
+    literal     go to state 38
+
+
+State 49
+
+   62 expression: expression MUL • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 98
+    literal     go to state 38
+
+
+State 50
+
+   63 expression: expression DIV • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 99
+    literal     go to state 38
+
+
+State 51
+
+   64 expression: expression MOD • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 100
+    literal     go to state 38
+
+
+State 52
+
+   67 expression: expression INCR •
+
+    $default  reduce using rule 67 (expression)
+
+
+State 53
+
+   68 expression: expression DECR •
+
+    $default  reduce using rule 68 (expression)
+
+
+State 54
+
+   69 expression: expression EQ • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 101
+    literal     go to state 38
+
+
+State 55
+
+   70 expression: expression NEQ • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 102
+    literal     go to state 38
+
+
+State 56
+
+   74 expression: expression GTE • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 103
+    literal     go to state 38
+
+
+State 57
+
+   73 expression: expression LTE • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 104
+    literal     go to state 38
+
+
+State 58
+
+   75 expression: expression REF_EQ • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 105
+    literal     go to state 38
+
+
+State 59
+
+   76 expression: expression REF_NEQ • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 106
+    literal     go to state 38
+
+
+State 60
+
+   77 expression: expression AND • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 107
+    literal     go to state 38
+
+
+State 61
+
+   78 expression: expression OR • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 108
+    literal     go to state 38
+
+
+State 62
+
+   58 expression: expression SAFE_CALL • IDENT
+
+    IDENT  shift, and go to state 109
+
+
+State 63
+
+   81 expression: expression ELVIS • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 110
+    literal     go to state 38
+
+
+State 64
+
+   79 expression: expression RANGE • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 111
+    literal     go to state 38
+
+
+State 65
+
+   80 expression: expression RANGE_UNTIL • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 112
+    literal     go to state 38
+
+
+State 66
+
+   59 expression: expression AS • type
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 113
+
+
+State 67
+
+   54 expression: expression LPAREN • RPAREN
+   55           | expression LPAREN • argumentList RPAREN
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    RPAREN            shift, and go to state 114
+
+    expression    go to state 115
+    argumentList  go to state 116
+    literal       go to state 38
+
+
+State 68
+
+   56 expression: expression LSQUARE • expression RSQUARE
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 117
+    literal     go to state 38
+
+
+State 69
+
+   71 expression: expression LANGLE • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 118
+    literal     go to state 38
+
+
+State 70
+
+   72 expression: expression RANGLE • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 119
+    literal     go to state 38
+
+
+State 71
+
+   57 expression: expression DOT • IDENT
+
+    IDENT  shift, and go to state 120
+
+
+State 72
+
+   31 varDeclaration: VAL • IDENT ASSIGNMENT expression
+   32               | VAL • IDENT COLON type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 121
+
+
+State 73
+
+   33 varDeclaration: VAR • IDENT ASSIGNMENT expression
+   34               | VAR • IDENT COLON type ASSIGNMENT expression
+   35               | VAR • IDENT COLON type
+
+    IDENT  shift, and go to state 122
+
+
+State 74
+
+   42 ifStatement: IF • LPAREN expression RPAREN controlStructureBody
+   43            | IF • LPAREN expression RPAREN controlStructureBody ELSE controlStructureBody
+
+    LPAREN  shift, and go to state 123
+
+
+State 75
+
+   44 whileStatement: WHILE • LPAREN expression RPAREN controlStructureBody
+
+    LPAREN  shift, and go to state 124
+
+
+State 76
+
+   45 forStatement: FOR • LPAREN IDENT IN expression RPAREN controlStructureBody
+
+    LPAREN  shift, and go to state 125
+
+
+State 77
+
+   46 jumpStatement: RETURN •
+   47              | RETURN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    INTEGERLITERAL    [reduce using rule 46 (jumpStatement)]
+    LONGLITERAL       [reduce using rule 46 (jumpStatement)]
+    REALLITERAL       [reduce using rule 46 (jumpStatement)]
+    DOUBLELITERAL     [reduce using rule 46 (jumpStatement)]
+    BOOLEANLITERAL    [reduce using rule 46 (jumpStatement)]
+    CHARACTERLITERAL  [reduce using rule 46 (jumpStatement)]
+    STRINGLITERAL     [reduce using rule 46 (jumpStatement)]
+    NULLLITERAL       [reduce using rule 46 (jumpStatement)]
+    IDENT             [reduce using rule 46 (jumpStatement)]
+    SUB               [reduce using rule 46 (jumpStatement)]
+    NOT               [reduce using rule 46 (jumpStatement)]
+    LPAREN            [reduce using rule 46 (jumpStatement)]
+    $default          reduce using rule 46 (jumpStatement)
+
+    expression  go to state 126
+    literal     go to state 38
+
+
+State 78
+
+   48 jumpStatement: BREAK •
+
+    $default  reduce using rule 48 (jumpStatement)
+
+
+State 79
+
+   49 jumpStatement: CONTINUE •
+
+    $default  reduce using rule 49 (jumpStatement)
+
+
+State 80
+
+   36 assignment: IDENT • ASSIGNMENT expression
+   37           | IDENT • ADD_ASSIGN expression
+   38           | IDENT • SUB_ASSIGN expression
+   39           | IDENT • MUL_ASSIGN expression
+   40           | IDENT • DIV_ASSIGN expression
+   41           | IDENT • MOD_ASSIGN expression
+   53 expression: IDENT •
+
+    ASSIGNMENT  shift, and go to state 127
+    ADD_ASSIGN  shift, and go to state 128
+    SUB_ASSIGN  shift, and go to state 129
+    MUL_ASSIGN  shift, and go to state 130
+    DIV_ASSIGN  shift, and go to state 131
+    MOD_ASSIGN  shift, and go to state 132
+
+    $default  reduce using rule 53 (expression)
+
+
+State 81
+
+   19 block: LCURL statements RCURL •
+
+    $default  reduce using rule 19 (block)
+
+
+State 82
+
+   23 statement: functionDeclaration •
+
+    $default  reduce using rule 23 (statement)
+
+
+State 83
+
+   21 statements: statements statement •
+
+    $default  reduce using rule 21 (statements)
+
+
+State 84
+
+   22 statement: varDeclaration •
+
+    $default  reduce using rule 22 (statement)
+
+
+State 85
+
+   28 statement: assignment •
+
+    $default  reduce using rule 28 (statement)
+
+
+State 86
+
+   24 statement: ifStatement •
+
+    $default  reduce using rule 24 (statement)
+
+
+State 87
+
+   25 statement: whileStatement •
+
+    $default  reduce using rule 25 (statement)
+
+
+State 88
+
+   26 statement: forStatement •
+
+    $default  reduce using rule 26 (statement)
+
+
+State 89
+
+   27 statement: jumpStatement •
+
+    $default  reduce using rule 27 (statement)
+
+
+State 90
+
+   29 statement: expression • SEMI
+   30          | expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+    SEMI         shift, and go to state 133
+
+    SUB       [reduce using rule 30 (statement)]
+    LPAREN    [reduce using rule 30 (statement)]
+    $default  reduce using rule 30 (statement)
+
+
+State 91
+
+    6 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 134
+    literal     go to state 38
+
+
+State 92
+
+    4 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type block •
+
+    $default  reduce using rule 4 (functionDeclaration)
+
+
+State 93
+
+   15 type: IDENT LANGLE typeArgumentList RANGLE •
+   16     | IDENT LANGLE typeArgumentList RANGLE • QUEST
+
+    QUEST  shift, and go to state 135
+
+    $default  reduce using rule 15 (type)
+
+
+State 94
+
+   18 typeArgumentList: typeArgumentList COMMA • type
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 136
+
+
+State 95
+
+   82 expression: LPAREN expression RPAREN •
+
+    $default  reduce using rule 82 (expression)
+
+
+State 96
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   60           | expression ADD expression •
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    MUL        shift, and go to state 49
+    DIV        shift, and go to state 50
+    MOD        shift, and go to state 51
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 60 (expression)]
+    $default  reduce using rule 60 (expression)
+
+
+State 97
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   61           | expression SUB expression •
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    MUL        shift, and go to state 49
+    DIV        shift, and go to state 50
+    MOD        shift, and go to state 51
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 61 (expression)]
+    $default  reduce using rule 61 (expression)
+
+
+State 98
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   62           | expression MUL expression •
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 62 (expression)]
+    $default  reduce using rule 62 (expression)
+
+
+State 99
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   63           | expression DIV expression •
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 63 (expression)]
+    $default  reduce using rule 63 (expression)
+
+
+State 100
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   64           | expression MOD expression •
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 64 (expression)]
+    $default  reduce using rule 64 (expression)
+
+
+State 101
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   69           | expression EQ expression •
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 69 (expression)]
+    $default  reduce using rule 69 (expression)
+
+
+State 102
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   70           | expression NEQ expression •
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 70 (expression)]
+    $default  reduce using rule 70 (expression)
+
+
+State 103
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   74           | expression GTE expression •
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 74 (expression)]
+    $default  reduce using rule 74 (expression)
+
+
+State 104
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   73           | expression LTE expression •
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 73 (expression)]
+    $default  reduce using rule 73 (expression)
+
+
+State 105
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   75           | expression REF_EQ expression •
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 75 (expression)]
+    $default  reduce using rule 75 (expression)
+
+
+State 106
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   76           | expression REF_NEQ expression •
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 76 (expression)]
+    $default  reduce using rule 76 (expression)
+
+
+State 107
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   77           | expression AND expression •
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 77 (expression)]
+    $default  reduce using rule 77 (expression)
+
+
+State 108
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   78           | expression OR expression •
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 78 (expression)]
+    $default  reduce using rule 78 (expression)
+
+
+State 109
+
+   58 expression: expression SAFE_CALL IDENT •
+
+    $default  reduce using rule 58 (expression)
+
+
+State 110
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+   81           | expression ELVIS expression •
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    ADD          [reduce using rule 81 (expression)]
+    SUB          [reduce using rule 81 (expression)]
+    MUL          [reduce using rule 81 (expression)]
+    DIV          [reduce using rule 81 (expression)]
+    MOD          [reduce using rule 81 (expression)]
+    INCR         [reduce using rule 81 (expression)]
+    DECR         [reduce using rule 81 (expression)]
+    EQ           [reduce using rule 81 (expression)]
+    NEQ          [reduce using rule 81 (expression)]
+    GTE          [reduce using rule 81 (expression)]
+    LTE          [reduce using rule 81 (expression)]
+    REF_EQ       [reduce using rule 81 (expression)]
+    REF_NEQ      [reduce using rule 81 (expression)]
+    AND          [reduce using rule 81 (expression)]
+    OR           [reduce using rule 81 (expression)]
+    SAFE_CALL    [reduce using rule 81 (expression)]
+    ELVIS        [reduce using rule 81 (expression)]
+    RANGE        [reduce using rule 81 (expression)]
+    RANGE_UNTIL  [reduce using rule 81 (expression)]
+    AS           [reduce using rule 81 (expression)]
+    LPAREN       [reduce using rule 81 (expression)]
+    LSQUARE      [reduce using rule 81 (expression)]
+    LANGLE       [reduce using rule 81 (expression)]
+    RANGLE       [reduce using rule 81 (expression)]
+    DOT          [reduce using rule 81 (expression)]
+    $default     reduce using rule 81 (expression)
+
+
+State 111
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   79           | expression RANGE expression •
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD        shift, and go to state 47
+    SUB        shift, and go to state 48
+    MUL        shift, and go to state 49
+    DIV        shift, and go to state 50
+    MOD        shift, and go to state 51
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 79 (expression)]
+    $default  reduce using rule 79 (expression)
+
+
+State 112
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   80           | expression RANGE_UNTIL expression •
+   81           | expression • ELVIS expression
+
+    ADD        shift, and go to state 47
+    SUB        shift, and go to state 48
+    MUL        shift, and go to state 49
+    DIV        shift, and go to state 50
+    MOD        shift, and go to state 51
+    INCR       shift, and go to state 52
+    DECR       shift, and go to state 53
+    SAFE_CALL  shift, and go to state 62
+    ELVIS      shift, and go to state 63
+    AS         shift, and go to state 66
+    LPAREN     shift, and go to state 67
+    LSQUARE    shift, and go to state 68
+    DOT        shift, and go to state 71
+
+    ELVIS     [reduce using rule 80 (expression)]
+    $default  reduce using rule 80 (expression)
+
+
+State 113
+
+   59 expression: expression AS type •
+
+    $default  reduce using rule 59 (expression)
+
+
+State 114
+
+   54 expression: expression LPAREN RPAREN •
+
+    $default  reduce using rule 54 (expression)
+
+
+State 115
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+   83 argumentList: expression •
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    $default  reduce using rule 83 (argumentList)
+
+
+State 116
+
+   55 expression: expression LPAREN argumentList • RPAREN
+   84 argumentList: argumentList • COMMA expression
+
+    RPAREN  shift, and go to state 137
+    COMMA   shift, and go to state 138
+
+
+State 117
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   56           | expression LSQUARE expression • RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    RSQUARE      shift, and go to state 139
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+
+State 118
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   71           | expression LANGLE expression •
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 71 (expression)]
+    $default  reduce using rule 71 (expression)
+
+
+State 119
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   72           | expression RANGLE expression •
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    DOT          shift, and go to state 71
+
+    ELVIS     [reduce using rule 72 (expression)]
+    $default  reduce using rule 72 (expression)
+
+
+State 120
+
+   57 expression: expression DOT IDENT •
+
+    $default  reduce using rule 57 (expression)
+
+
+State 121
+
+   31 varDeclaration: VAL IDENT • ASSIGNMENT expression
+   32               | VAL IDENT • COLON type ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 140
+    COLON       shift, and go to state 141
+
+
+State 122
+
+   33 varDeclaration: VAR IDENT • ASSIGNMENT expression
+   34               | VAR IDENT • COLON type ASSIGNMENT expression
+   35               | VAR IDENT • COLON type
+
+    ASSIGNMENT  shift, and go to state 142
+    COLON       shift, and go to state 143
+
+
+State 123
+
+   42 ifStatement: IF LPAREN • expression RPAREN controlStructureBody
+   43            | IF LPAREN • expression RPAREN controlStructureBody ELSE controlStructureBody
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 144
+    literal     go to state 38
+
+
+State 124
+
+   44 whileStatement: WHILE LPAREN • expression RPAREN controlStructureBody
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 145
+    literal     go to state 38
+
+
+State 125
+
+   45 forStatement: FOR LPAREN • IDENT IN expression RPAREN controlStructureBody
+
+    IDENT  shift, and go to state 146
+
+
+State 126
+
+   47 jumpStatement: RETURN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 47 (jumpStatement)]
+    LPAREN    [reduce using rule 47 (jumpStatement)]
+    $default  reduce using rule 47 (jumpStatement)
+
+
+State 127
+
+   36 assignment: IDENT ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 147
+    literal     go to state 38
+
+
+State 128
+
+   37 assignment: IDENT ADD_ASSIGN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 148
+    literal     go to state 38
+
+
+State 129
+
+   38 assignment: IDENT SUB_ASSIGN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 149
+    literal     go to state 38
+
+
+State 130
+
+   39 assignment: IDENT MUL_ASSIGN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 150
+    literal     go to state 38
+
+
+State 131
+
+   40 assignment: IDENT DIV_ASSIGN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 151
+    literal     go to state 38
+
+
+State 132
+
+   41 assignment: IDENT MOD_ASSIGN • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 152
+    literal     go to state 38
+
+
+State 133
+
+   29 statement: expression SEMI •
+
+    $default  reduce using rule 29 (statement)
+
+
+State 134
+
+    6 functionDeclaration: FUN IDENT LPAREN functionValueParameters RPAREN COLON type ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 6 (functionDeclaration)]
+    LPAREN    [reduce using rule 6 (functionDeclaration)]
+    $default  reduce using rule 6 (functionDeclaration)
+
+
+State 135
+
+   16 type: IDENT LANGLE typeArgumentList RANGLE QUEST •
+
+    $default  reduce using rule 16 (type)
+
+
+State 136
+
+   18 typeArgumentList: typeArgumentList COMMA type •
+
+    $default  reduce using rule 18 (typeArgumentList)
+
+
+State 137
+
+   55 expression: expression LPAREN argumentList RPAREN •
+
+    $default  reduce using rule 55 (expression)
+
+
+State 138
+
+   84 argumentList: argumentList COMMA • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 153
+    literal     go to state 38
+
+
+State 139
+
+   56 expression: expression LSQUARE expression RSQUARE •
+
+    $default  reduce using rule 56 (expression)
+
+
+State 140
+
+   31 varDeclaration: VAL IDENT ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 154
+    literal     go to state 38
+
+
+State 141
+
+   32 varDeclaration: VAL IDENT COLON • type ASSIGNMENT expression
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 155
+
+
+State 142
+
+   33 varDeclaration: VAR IDENT ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 156
+    literal     go to state 38
+
+
+State 143
+
+   34 varDeclaration: VAR IDENT COLON • type ASSIGNMENT expression
+   35               | VAR IDENT COLON • type
+
+    IDENT  shift, and go to state 15
+
+    type  go to state 157
+
+
+State 144
+
+   42 ifStatement: IF LPAREN expression • RPAREN controlStructureBody
+   43            | IF LPAREN expression • RPAREN controlStructureBody ELSE controlStructureBody
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    RPAREN       shift, and go to state 158
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+
+State 145
+
+   44 whileStatement: WHILE LPAREN expression • RPAREN controlStructureBody
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    RPAREN       shift, and go to state 159
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+
+State 146
+
+   45 forStatement: FOR LPAREN IDENT • IN expression RPAREN controlStructureBody
+
+    IN  shift, and go to state 160
+
+
+State 147
+
+   36 assignment: IDENT ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 36 (assignment)]
+    LPAREN    [reduce using rule 36 (assignment)]
+    $default  reduce using rule 36 (assignment)
+
+
+State 148
+
+   37 assignment: IDENT ADD_ASSIGN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 37 (assignment)]
+    LPAREN    [reduce using rule 37 (assignment)]
+    $default  reduce using rule 37 (assignment)
+
+
+State 149
+
+   38 assignment: IDENT SUB_ASSIGN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 38 (assignment)]
+    LPAREN    [reduce using rule 38 (assignment)]
+    $default  reduce using rule 38 (assignment)
+
+
+State 150
+
+   39 assignment: IDENT MUL_ASSIGN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 39 (assignment)]
+    LPAREN    [reduce using rule 39 (assignment)]
+    $default  reduce using rule 39 (assignment)
+
+
+State 151
+
+   40 assignment: IDENT DIV_ASSIGN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 40 (assignment)]
+    LPAREN    [reduce using rule 40 (assignment)]
+    $default  reduce using rule 40 (assignment)
+
+
+State 152
+
+   41 assignment: IDENT MOD_ASSIGN expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 41 (assignment)]
+    LPAREN    [reduce using rule 41 (assignment)]
+    $default  reduce using rule 41 (assignment)
+
+
+State 153
+
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+   84 argumentList: argumentList COMMA expression •
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    $default  reduce using rule 84 (argumentList)
+
+
+State 154
+
+   31 varDeclaration: VAL IDENT ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 31 (varDeclaration)]
+    LPAREN    [reduce using rule 31 (varDeclaration)]
+    $default  reduce using rule 31 (varDeclaration)
+
+
+State 155
+
+   32 varDeclaration: VAL IDENT COLON type • ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 161
+
+
+State 156
+
+   33 varDeclaration: VAR IDENT ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 33 (varDeclaration)]
+    LPAREN    [reduce using rule 33 (varDeclaration)]
+    $default  reduce using rule 33 (varDeclaration)
+
+
+State 157
+
+   34 varDeclaration: VAR IDENT COLON type • ASSIGNMENT expression
+   35               | VAR IDENT COLON type •
+
+    ASSIGNMENT  shift, and go to state 162
+
+    $default  reduce using rule 35 (varDeclaration)
+
+
+State 158
+
+   42 ifStatement: IF LPAREN expression RPAREN • controlStructureBody
+   43            | IF LPAREN expression RPAREN • controlStructureBody ELSE controlStructureBody
+
+    FUN               shift, and go to state 1
+    VAL               shift, and go to state 72
+    VAR               shift, and go to state 73
+    IF                shift, and go to state 74
+    WHILE             shift, and go to state 75
+    FOR               shift, and go to state 76
+    RETURN            shift, and go to state 77
+    BREAK             shift, and go to state 78
+    CONTINUE          shift, and go to state 79
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 80
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    LCURL             shift, and go to state 18
+
+    functionDeclaration   go to state 82
+    block                 go to state 163
+    statement             go to state 164
+    varDeclaration        go to state 84
+    assignment            go to state 85
+    ifStatement           go to state 86
+    whileStatement        go to state 87
+    forStatement          go to state 88
+    jumpStatement         go to state 89
+    controlStructureBody  go to state 165
+    expression            go to state 90
+    literal               go to state 38
+
+
+State 159
+
+   44 whileStatement: WHILE LPAREN expression RPAREN • controlStructureBody
+
+    FUN               shift, and go to state 1
+    VAL               shift, and go to state 72
+    VAR               shift, and go to state 73
+    IF                shift, and go to state 74
+    WHILE             shift, and go to state 75
+    FOR               shift, and go to state 76
+    RETURN            shift, and go to state 77
+    BREAK             shift, and go to state 78
+    CONTINUE          shift, and go to state 79
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 80
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    LCURL             shift, and go to state 18
+
+    functionDeclaration   go to state 82
+    block                 go to state 163
+    statement             go to state 164
+    varDeclaration        go to state 84
+    assignment            go to state 85
+    ifStatement           go to state 86
+    whileStatement        go to state 87
+    forStatement          go to state 88
+    jumpStatement         go to state 89
+    controlStructureBody  go to state 166
+    expression            go to state 90
+    literal               go to state 38
+
+
+State 160
+
+   45 forStatement: FOR LPAREN IDENT IN • expression RPAREN controlStructureBody
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 167
+    literal     go to state 38
+
+
+State 161
+
+   32 varDeclaration: VAL IDENT COLON type ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 168
+    literal     go to state 38
+
+
+State 162
+
+   34 varDeclaration: VAR IDENT COLON type ASSIGNMENT • expression
+
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 33
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+
+    expression  go to state 169
+    literal     go to state 38
+
+
+State 163
+
+   50 controlStructureBody: block •
+
+    $default  reduce using rule 50 (controlStructureBody)
+
+
+State 164
+
+   51 controlStructureBody: statement •
+
+    $default  reduce using rule 51 (controlStructureBody)
+
+
+State 165
+
+   42 ifStatement: IF LPAREN expression RPAREN controlStructureBody •
+   43            | IF LPAREN expression RPAREN controlStructureBody • ELSE controlStructureBody
+
+    ELSE  shift, and go to state 170
+
+    ELSE      [reduce using rule 42 (ifStatement)]
+    $default  reduce using rule 42 (ifStatement)
+
+
+State 166
+
+   44 whileStatement: WHILE LPAREN expression RPAREN controlStructureBody •
+
+    $default  reduce using rule 44 (whileStatement)
+
+
+State 167
+
+   45 forStatement: FOR LPAREN IDENT IN expression • RPAREN controlStructureBody
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    RPAREN       shift, and go to state 171
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+
+State 168
+
+   32 varDeclaration: VAL IDENT COLON type ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 32 (varDeclaration)]
+    LPAREN    [reduce using rule 32 (varDeclaration)]
+    $default  reduce using rule 32 (varDeclaration)
+
+
+State 169
+
+   34 varDeclaration: VAR IDENT COLON type ASSIGNMENT expression •
+   54 expression: expression • LPAREN RPAREN
+   55           | expression • LPAREN argumentList RPAREN
+   56           | expression • LSQUARE expression RSQUARE
+   57           | expression • DOT IDENT
+   58           | expression • SAFE_CALL IDENT
+   59           | expression • AS type
+   60           | expression • ADD expression
+   61           | expression • SUB expression
+   62           | expression • MUL expression
+   63           | expression • DIV expression
+   64           | expression • MOD expression
+   67           | expression • INCR
+   68           | expression • DECR
+   69           | expression • EQ expression
+   70           | expression • NEQ expression
+   71           | expression • LANGLE expression
+   72           | expression • RANGLE expression
+   73           | expression • LTE expression
+   74           | expression • GTE expression
+   75           | expression • REF_EQ expression
+   76           | expression • REF_NEQ expression
+   77           | expression • AND expression
+   78           | expression • OR expression
+   79           | expression • RANGE expression
+   80           | expression • RANGE_UNTIL expression
+   81           | expression • ELVIS expression
+
+    ADD          shift, and go to state 47
+    SUB          shift, and go to state 48
+    MUL          shift, and go to state 49
+    DIV          shift, and go to state 50
+    MOD          shift, and go to state 51
+    INCR         shift, and go to state 52
+    DECR         shift, and go to state 53
+    EQ           shift, and go to state 54
+    NEQ          shift, and go to state 55
+    GTE          shift, and go to state 56
+    LTE          shift, and go to state 57
+    REF_EQ       shift, and go to state 58
+    REF_NEQ      shift, and go to state 59
+    AND          shift, and go to state 60
+    OR           shift, and go to state 61
+    SAFE_CALL    shift, and go to state 62
+    ELVIS        shift, and go to state 63
+    RANGE        shift, and go to state 64
+    RANGE_UNTIL  shift, and go to state 65
+    AS           shift, and go to state 66
+    LPAREN       shift, and go to state 67
+    LSQUARE      shift, and go to state 68
+    LANGLE       shift, and go to state 69
+    RANGLE       shift, and go to state 70
+    DOT          shift, and go to state 71
+
+    SUB       [reduce using rule 34 (varDeclaration)]
+    LPAREN    [reduce using rule 34 (varDeclaration)]
+    $default  reduce using rule 34 (varDeclaration)
+
+
+State 170
+
+   43 ifStatement: IF LPAREN expression RPAREN controlStructureBody ELSE • controlStructureBody
+
+    FUN               shift, and go to state 1
+    VAL               shift, and go to state 72
+    VAR               shift, and go to state 73
+    IF                shift, and go to state 74
+    WHILE             shift, and go to state 75
+    FOR               shift, and go to state 76
+    RETURN            shift, and go to state 77
+    BREAK             shift, and go to state 78
+    CONTINUE          shift, and go to state 79
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 80
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    LCURL             shift, and go to state 18
+
+    functionDeclaration   go to state 82
+    block                 go to state 163
+    statement             go to state 164
+    varDeclaration        go to state 84
+    assignment            go to state 85
+    ifStatement           go to state 86
+    whileStatement        go to state 87
+    forStatement          go to state 88
+    jumpStatement         go to state 89
+    controlStructureBody  go to state 172
+    expression            go to state 90
+    literal               go to state 38
+
+
+State 171
+
+   45 forStatement: FOR LPAREN IDENT IN expression RPAREN • controlStructureBody
+
+    FUN               shift, and go to state 1
+    VAL               shift, and go to state 72
+    VAR               shift, and go to state 73
+    IF                shift, and go to state 74
+    WHILE             shift, and go to state 75
+    FOR               shift, and go to state 76
+    RETURN            shift, and go to state 77
+    BREAK             shift, and go to state 78
+    CONTINUE          shift, and go to state 79
+    INTEGERLITERAL    shift, and go to state 25
+    LONGLITERAL       shift, and go to state 26
+    REALLITERAL       shift, and go to state 27
+    DOUBLELITERAL     shift, and go to state 28
+    BOOLEANLITERAL    shift, and go to state 29
+    CHARACTERLITERAL  shift, and go to state 30
+    STRINGLITERAL     shift, and go to state 31
+    NULLLITERAL       shift, and go to state 32
+    IDENT             shift, and go to state 80
+    SUB               shift, and go to state 34
+    NOT               shift, and go to state 35
+    LPAREN            shift, and go to state 36
+    LCURL             shift, and go to state 18
+
+    functionDeclaration   go to state 82
+    block                 go to state 163
+    statement             go to state 164
+    varDeclaration        go to state 84
+    assignment            go to state 85
+    ifStatement           go to state 86
+    whileStatement        go to state 87
+    forStatement          go to state 88
+    jumpStatement         go to state 89
+    controlStructureBody  go to state 173
+    expression            go to state 90
+    literal               go to state 38
+
+
+State 172
+
+   43 ifStatement: IF LPAREN expression RPAREN controlStructureBody ELSE controlStructureBody •
+
+    $default  reduce using rule 43 (ifStatement)
+
+
+State 173
+
+   45 forStatement: FOR LPAREN IDENT IN expression RPAREN controlStructureBody •
+
+    $default  reduce using rule 45 (forStatement)
