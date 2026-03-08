@@ -44,14 +44,6 @@ char *copy_string(const char *s) {
    return p;
 }
 
-
-static void set_yylval_from_yytoken(int category) {
-   yylval.tok = token_create(category,
-                             (yytoken && yytoken->text) ? yytoken->text : yytext,
-                             lineno);
-   printtok(yylval.tok);
-}
-
 /* extra print thing inside lexer to show info is present before parsing */
 static void printtok(token_t *t) {
    if (!t) return;
@@ -59,6 +51,13 @@ static void printtok(token_t *t) {
           t->code,
           t->lexeme ? t->lexeme : "",
           t->line);
+}
+
+static void set_yylval_from_yytoken(int category) {
+   yylval.tok = token_create(category,
+                             (yytoken && yytoken->text) ? yytoken->text : yytext,
+                             lineno);
+   printtok(yylval.tok);
 }
 
 static void free_yytoken(void) {
