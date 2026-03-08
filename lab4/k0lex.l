@@ -4,7 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "k0gram.tab.h"
-#include "token.h"     
+#include "token.h"    
+#include "tree.h" 
 
 
 int lineno = 1;
