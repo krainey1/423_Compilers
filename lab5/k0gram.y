@@ -133,7 +133,7 @@ int     g_syntax_errors = 0;
 %nonassoc INCR DECR
 
 
-%type <tree> program topLevelObject
+%type <tree> program topLevelObjects topLevelObject
 %type <tree> functionDeclaration
 %type <tree> functionValueParameters functionValueParameterList functionValueParameter
 %type <tree> type typeArgumentList
@@ -150,17 +150,29 @@ int     g_syntax_errors = 0;
 
 
 program
-    : topLevelObject
+    : topLevelObjects
         {
             $$ = tree_node("program", 1, 1, $1);
             g_root = $$;
         }
     ;
 
+topLevelObjects
+    : topLevelObject
+        {
+            $$ = $1;
+        }
+    | topLevelObjects topLevelObject
+        {
+            $$ = tree_node("topLevelObjects", 1, 2, $1, $2);
+        }
+    ;
 
 topLevelObject
     : functionDeclaration
-        { $$ = tree_node("topLevelObject", 1, 1, $1); }
+        {
+            $$ = tree_node("topLevelObject", 1, 1, $1);
+        }
     ;
 
 
