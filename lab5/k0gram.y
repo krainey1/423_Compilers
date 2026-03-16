@@ -10,6 +10,7 @@
 #include "tree.h"
 #include "token.h"
 
+#define YYDEBUG 1
 int  yylex(void);
 void yyerror(const char *s);
 
@@ -537,4 +538,13 @@ void yyerror(const char *s) {
     fprintf(stderr, "%s:%d: syntax error: %s\n",
             current_filename ? current_filename : "<stdin>",
             lineno, s);
+}
+
+const char *yyname(int sym) {
+    /* yytname starts at index 3 for user tokens: 0=$end,1=error,2=$undefined */
+    /* tokens start at 258; FUN is the first %token (index 3 in yytname)      */
+    int idx = sym - FUN + 3;
+    if (idx < 0 || idx >= (int)(sizeof(yytname)/sizeof(yytname[0])))
+        return "UNKNOWN";
+    return yytname[idx];
 }

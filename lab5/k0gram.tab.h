@@ -135,7 +135,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 25 "k0gram.y"
+#line 26 "k0gram.y"
 
     token_t       *tok;
     tree_t       *tree;

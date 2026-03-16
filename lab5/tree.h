@@ -9,11 +9,13 @@ typedef struct tree {
   int nkids;
   struct tree *kids[9];  // assignment says up to 9 is fine
   token_t *leaf;         // if nkids==0, may be non-null token
+  int id;                // unique node id for dot output
 } tree_t;
 
 tree_t *tree_node(const char *symbol, int prodrule, int nkids, ...);
 tree_t *tree_leaf(token_t *tok);
 void tree_print(tree_t *t, int depth);
 void tree_free(tree_t *t);
+void print_graph(tree_t *t, const char *filename);
 
 #endif
