@@ -598,7 +598,7 @@ char *copy_string(const char *s) {
 /* extra print thing inside lexer to show info is present before parsing */
 static void printtok(token_t *t) {
    if (!t) return;
-   printf("LEX TOKEN(%d) \"%s\" [line %d]\n",
+   fprintf(stderr, "LEX TOKEN(%d) \"%s\" [line %d]\n",
           t->code,
           t->lexeme ? t->lexeme : "",
           t->line);
@@ -2435,5 +2435,6 @@ void yyfree (void * ptr )
 #define YYTABLES_NAME "yytables"
 
 #line 338 "k0lex.l"
+
 
 

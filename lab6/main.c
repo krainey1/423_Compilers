@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tree.h"
+#include "symtab.h"
+#include "syms.h"
 
 extern FILE *yyin;
 extern int yyparse(void);
@@ -62,7 +64,21 @@ int main(int argc, char **argv) {
     free(dotfile);
   } else {
     tree_print(g_root, 0);
+
+
+
+    //lab 6 additions
+    fprintf(stderr, "\nprintsyms: \n");
+    printsyms(g_root);
+ 
+    
+    buildsymtabs(g_root, source_file);
+    printsymtabs();
+    freesymtabs();
   }
+
+
+  
 
   tree_free(g_root);
   return 0;
