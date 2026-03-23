@@ -77,7 +77,7 @@ void printsymtab(SymbolTable st, int depth)
  
     #define IND(d) do { for (int _i=0;_i<(d)*3;_i++) putchar(' '); } while(0)
  
-    const char *kind = (st->parent == NULL) ? "GLOBAL" : "LOCAL ";
+    const char *kind = (st->parent == NULL) ? "GLOBAL" : "LOCAL";
  
     IND(depth);
     printf("[%s]  scope: \"%s\"", kind, st->name);
