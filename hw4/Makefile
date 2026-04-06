@@ -1,10 +1,10 @@
 CC=gcc
 CFLAGS=-Wall -g
 
-all: parser
+all: k0
 
-parser: k0gram.tab.c lex.yy.c main.o tree.o token.o symtab.o syms.o
-	$(CC) $(CFLAGS) -o parser k0gram.tab.c lex.yy.c main.o tree.o token.o symtab.o syms.o
+k0: k0gram.tab.c lex.yy.c main.o tree.o token.o symtab.o syms.o
+	$(CC) $(CFLAGS) -o k0 k0gram.tab.c lex.yy.c main.o tree.o token.o symtab.o syms.o
 
 k0gram.tab.c k0gram.tab.h: k0gram.y
 	bison -d -v k0gram.y
@@ -28,4 +28,4 @@ syms.o: syms.c syms.h tree.h token.h symtab.h
 	$(CC) $(CFLAGS) -c syms.c
 
 clean:
-	rm -f parser *.o k0gram.tab.c k0gram.tab.h lex.yy.c k0gram.output
+	rm -f k0 *.o k0gram.tab.c k0gram.tab.h lex.yy.c k0gram.output
