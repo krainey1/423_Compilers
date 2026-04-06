@@ -5,10 +5,11 @@
 #include "tree.h"
 #include "symtab.h"
 #include "syms.h"
-#include "dot_graph.h"
 
 extern FILE *yyin;
 extern int yyparse(void);
+
+extern void print_graph(tree_t *t, const char *filename);
 
 const char *yyfilename = NULL;
 char *current_filename = NULL;
@@ -90,10 +91,7 @@ int main(int argc, char **argv) {
 
         sprintf(dotfile, "%s.dot", source_file);
         print_graph(g_root, dotfile);
-
-        /* useful user-facing output, not debug */
         printf("dot file written to: %s\n", dotfile);
-
         free(dotfile);
     }
 
@@ -111,7 +109,7 @@ int main(int argc, char **argv) {
     }
 
     /* debugging only:
-    fprintf(stderr, "\\nprintsyms:\\n");
+    fprintf(stderr, "\nprintsyms:\n");
     printsyms(g_root);
     */
 
