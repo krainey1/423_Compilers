@@ -66,6 +66,14 @@ static void scope_list_append(SymbolTable st)
     }
 }
 
+static void install_predefined(SymbolTable global)
+{
+    insertsym(global, "println");
+    insertsym(global, "Int");
+    insertsym(global, "String");
+    insertsym(global, "Array");
+}
+
 
 static void collect_scopes(struct tree *t, SymbolTable current)
 {
@@ -119,6 +127,8 @@ SymbolTable buildsymtabs(struct tree *root, const char *filename)
     /* Create the global/file-level scope */
     SymbolTable global = mksymtab(NBUCKETS, filename, NULL);
     scope_list_append(global);
+
+    install_predefined(global);
 
     /* Populate: insert declarations, create function child scopes */
     collect_scopes(root, global);
