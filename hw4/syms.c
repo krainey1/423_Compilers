@@ -266,10 +266,10 @@ SymbolTable buildsymtabs(struct tree *root, const char *filename)
 void printsymtabs(void)
 {
     printf("\n========== Symbol Tables ==========\n");
-    int scope_num = 0;
+    if (g_semantic_errors > 0) return;
+
     for (ScopeNode *n = scope_list_head; n; n = n->next) {
-        printsymtab(n->table, scope_num == 0 ? 0 : 1);
-        scope_num++;
+        printsymtab(n->table, 0);
     }
     printf("===================================\n");
 }
