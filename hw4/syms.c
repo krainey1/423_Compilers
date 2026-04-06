@@ -86,7 +86,15 @@ static void collect_scopes(struct tree *t, SymbolTable current)
         scope_list_append(fn_scope);
 
         /* Insert the function name into the parent scope */
-        if (fname) insertsym(current, fname);
+        if (fname) {
+            if (lookup_current_scope(current, fname)) {
+                fprintf(stderr, "%s: semantic error: redeclared variable %s\n",
+                        current->name, fname);
+                g_semantic_errors++;
+            } else {
+                insertsym(current, fname);
+            }
+        }
 
         for (int i = 0; i < t->nkids; i++) {
             if (t->symbol && strcmp(t->symbol, "functionValueParameter") == 0)
@@ -99,21 +107,45 @@ static void collect_scopes(struct tree *t, SymbolTable current)
 
     if (t->symbol && strcmp(t->symbol, "varDeclaration") == 0) {
         const char *name = leaf_lexeme(t->kids[1]);
-        if (name) insertsym(current, name);
+        if (name) {
+            if (lookup_current_scope(current, name)) {
+                fprintf(stderr, "%s: semantic error: redeclared variable %s\n",
+                        current->name, name);
+                g_semantic_errors++;
+            } else {
+                insertsym(current, name);
+            }
+        }
         for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
         return;
     }
 
     if (t->symbol && strcmp(t->symbol, "functionValueParameter") == 0) {
         const char *name = leaf_lexeme(t->kids[0]);
-        if (name) insertsym(current, name);
+        if (name) {
+            if (lookup_current_scope(current, name)) {
+                fprintf(stderr, "%s: semantic error: redeclared variable %s\n",
+                        current->name, name);
+                g_semantic_errors++;
+            } else {
+                insertsym(current, name);
+            }
+        }
         for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
         return;
     }
 
     if (t->symbol && strcmp(t->symbol, "forStatement") == 0) {
         const char *name = leaf_lexeme(t->kids[2]);
-        if (name) insertsym(current, name);
+        if (name) {
+            if (lookup_current_scope(current, name)) {
+                fprintf(stderr, "%s: semantic error: redeclared variable %s\n",
+                        current->name, name);
+                g_semantic_errors++;
+            } else {
+                insertsym(current, name);
+            }
+        }
         for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
         return;
     }
