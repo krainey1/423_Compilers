@@ -12,7 +12,7 @@ extern int yyparse(void);
 extern void print_graph(tree_t *t, const char *filename);
 
 const char *yyfilename = NULL;
-char *current_filename = NULL;
+extern char *current_filename;
 
 extern int g_lex_errors;      /* from lexer */
 extern int g_syntax_errors;   /* from parser */
