@@ -5,8 +5,9 @@
 #include "tree.h"
 #include "token.h"
 #include "symtab.h"
+#include "k0gram.tab.h"
 
-#define IDENT_CODE 281
+
 
 //number of hash buckets per scope
 #define NBUCKETS 23
@@ -24,7 +25,7 @@ void printsyms(struct tree *t)
 
     if (t->nkids == 0) {
         /* Leaf node */
-        if (t->leaf && t->leaf->code == IDENT_CODE && t->leaf->lexeme)
+        if (t->leaf && t->leaf->code == IDENT && t->leaf->lexeme)
             printsymbol(t->leaf->lexeme);
         return;
     }
