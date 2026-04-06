@@ -12,6 +12,9 @@
 //number of hash buckets per scope
 #define NBUCKETS 23
 
+///semantic error counter
+int g_semantic_errors = 0;
+
 
 static void printsymbol(const char *s)
 {
