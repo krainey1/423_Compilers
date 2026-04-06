@@ -9,5 +9,6 @@ void printsymtabs(void);
 void freesymtabs(void);
 
 extern int g_semantic_errors;
+void check_undeclared(struct tree *root, SymbolTable global);
  
 #endif 
