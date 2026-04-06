@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
     /* semantic analysis */
     SymbolTable global = buildsymtabs(g_root, source_file);
     check_undeclared(g_root, global);
+    annotate_expr_types(g_root, global);
 
     if (g_semantic_errors > 0) {
         freesymtabs();
