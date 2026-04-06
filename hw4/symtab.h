@@ -23,6 +23,8 @@ SymbolTableEntry lookupsym(SymbolTable st, const char *s);
 void printsymtab(SymbolTable st, int indent);
 void freesymtab(SymbolTable st);
 
+SymbolTableEntry lookup_current_scope(SymbolTable st, const char *s);
+
 
 int hash(SymbolTable st, char *s);
 
