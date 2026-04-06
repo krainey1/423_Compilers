@@ -7,35 +7,25 @@
 #include "symtab.h"
 #include "k0gram.tab.h"
 
-
-
-//number of hash buckets per scope
+/* number of hash buckets per scope */
 #define NBUCKETS 23
 
-///semantic error counter
+/* semantic error counter */
 int g_semantic_errors = 0;
 
-
-static void printsymbol(const char *s)
-{
-    printf("%s\n", s);
-    fflush(stdout);
-}
 
 void printsyms(struct tree *t)
 {
     if (!t) return;
-
     if (t->nkids == 0) {
-        /* Leaf node */
         if (t->leaf && t->leaf->code == IDENT && t->leaf->lexeme)
-            printsymbol(t->leaf->lexeme);
+            printf("%s\n", t->leaf->lexeme);
         return;
     }
-
     for (int i = 0; i < t->nkids; i++)
         printsyms(t->kids[i]);
 }
+
 
 static const char *leaf_lexeme(struct tree *t)
 {
@@ -43,6 +33,7 @@ static const char *leaf_lexeme(struct tree *t)
         return t->leaf->lexeme;
     return NULL;
 }
+
 
 static int is_decl_context(struct tree *parent, int kid_index)
 {
@@ -78,12 +69,30 @@ static void scope_list_append(SymbolTable st)
     }
 }
 
-static void install_predefined(SymbolTable global)
+
+static SymbolTable g_predefined = NULL;
+
+static SymbolTable make_predefined_scope(void)
 {
-    insertsym(global, "println");
-    insertsym(global, "Int");
-    insertsym(global, "String");
-    insertsym(global, "Array");
+    /* parent == NULL marks this as the root of the chain */
+    SymbolTable pre = mksymtab(NBUCKETS, "predefined", NULL);
+
+    /* built-in types */
+    insertsym(pre, "Int");
+    insertsym(pre, "Long");
+    insertsym(pre, "Double");
+    insertsym(pre, "Float");
+    insertsym(pre, "Boolean");
+    insertsym(pre, "Char");
+    insertsym(pre, "String");
+    insertsym(pre, "Array");
+
+    /* built-in I/O functions */
+    insertsym(pre, "print");
+    insertsym(pre, "println");
+    insertsym(pre, "readLine");
+
+    return pre;
 }
 
 
@@ -92,12 +101,11 @@ static void collect_scopes(struct tree *t, SymbolTable current)
     if (!t) return;
     if (t->nkids == 0) return;
 
+    /* --- function declaration ------------------------------------------ */
     if (t->symbol && strcmp(t->symbol, "functionDeclaration") == 0) {
         const char *fname = leaf_lexeme(t->kids[1]);
-        SymbolTable fn_scope = mksymtab(NBUCKETS, fname ? fname : "fn", current);
-        scope_list_append(fn_scope);
 
-        /* Insert the function name into the parent scope */
+        /* Insert function name into the enclosing (package or outer fn) scope */
         if (fname) {
             if (lookup_current_scope(current, fname)) {
                 fprintf(stderr, "%s: semantic error: redeclared variable %s\n",
@@ -108,15 +116,18 @@ static void collect_scopes(struct tree *t, SymbolTable current)
             }
         }
 
-        for (int i = 0; i < t->nkids; i++) {
-            if (t->symbol && strcmp(t->symbol, "functionValueParameter") == 0)
-                collect_scopes(t->kids[i], fn_scope);
-            else
-                collect_scopes(t->kids[i], fn_scope);
-        }
+        /* Create a new scope for this function's parameters and locals */
+        SymbolTable fn_scope = mksymtab(NBUCKETS, fname ? fname : "fn", current);
+        scope_list_append(fn_scope);
+
+        /* Recurse into all children using the function scope */
+        for (int i = 0; i < t->nkids; i++)
+            collect_scopes(t->kids[i], fn_scope);
+
         return;
     }
 
+  
     if (t->symbol && strcmp(t->symbol, "varDeclaration") == 0) {
         const char *name = leaf_lexeme(t->kids[1]);
         if (name) {
@@ -125,12 +136,17 @@ static void collect_scopes(struct tree *t, SymbolTable current)
                         current->name, name);
                 g_semantic_errors++;
             } else {
-                insertsym(current, name);
+                SymbolTableEntry e = insertsym(current, name);
+                /* mark val declarations as const */
+                if (e && t->kids[0] && t->kids[0]->leaf &&
+                    strcmp(t->kids[0]->leaf->lexeme, "val") == 0)
+                    e->is_const = 1;
             }
         }
         for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
         return;
     }
+
 
     if (t->symbol && strcmp(t->symbol, "functionValueParameter") == 0) {
         const char *name = leaf_lexeme(t->kids[0]);
@@ -147,6 +163,7 @@ static void collect_scopes(struct tree *t, SymbolTable current)
         return;
     }
 
+ 
     if (t->symbol && strcmp(t->symbol, "forStatement") == 0) {
         const char *name = leaf_lexeme(t->kids[2]);
         if (name) {
@@ -162,10 +179,13 @@ static void collect_scopes(struct tree *t, SymbolTable current)
         return;
     }
 
+
     for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
 }
 
-static void check_undeclared_rec(struct tree *t, struct tree *parent, int kid_index, SymbolTable current)
+
+static void check_undeclared_rec(struct tree *t, struct tree *parent,
+                                 int kid_index, SymbolTable current)
 {
     if (!t) return;
 
@@ -182,6 +202,7 @@ static void check_undeclared_rec(struct tree *t, struct tree *parent, int kid_in
         return;
     }
 
+    /* Switch into a function's own scope when descending into it */
     if (t->symbol && strcmp(t->symbol, "functionDeclaration") == 0) {
         const char *fname = leaf_lexeme(t->kids[1]);
         SymbolTable fn_scope = NULL;
@@ -204,7 +225,6 @@ static void check_undeclared_rec(struct tree *t, struct tree *parent, int kid_in
         check_undeclared_rec(t->kids[i], t, i, current);
 }
 
-
 void check_undeclared(struct tree *root, SymbolTable global)
 {
     check_undeclared_rec(root, NULL, -1, global);
@@ -213,29 +233,31 @@ void check_undeclared(struct tree *root, SymbolTable global)
 
 SymbolTable buildsymtabs(struct tree *root, const char *filename)
 {
-    /* Create the global/file-level scope */
-    SymbolTable global = mksymtab(NBUCKETS, filename, NULL);
+    (void)filename; 
+
+  
+    g_predefined = make_predefined_scope();
+   
+
+   
+    SymbolTable global = mksymtab(NBUCKETS, "main", g_predefined);
     scope_list_append(global);
 
-    install_predefined(global);
-
-    /* Populate: insert declarations, create function child scopes */
+  
     collect_scopes(root, global);
 
     return global;
 }
 
+
 void printsymtabs(void)
 {
     if (g_semantic_errors > 0) return;
-    
-    printf("\n========== Symbol Tables ==========\n");
 
-    for (ScopeNode *n = scope_list_head; n; n = n->next) {
-        printsymtab(n->table, 0);
-    }
-    printf("===================================\n");
+    for (ScopeNode *n = scope_list_head; n; n = n->next)
+        printsymtab(n->table);
 }
+
 
 void freesymtabs(void)
 {
@@ -247,4 +269,10 @@ void freesymtabs(void)
         n = next;
     }
     scope_list_head = scope_list_tail = NULL;
+
+    /* free predefined scope separately (not in scope_list) */
+    if (g_predefined) {
+        freesymtab(g_predefined);
+        g_predefined = NULL;
+    }
 }
