@@ -7,5 +7,7 @@ void printsyms(struct tree *t);
 SymbolTable buildsymtabs(struct tree *root, const char *filename);
 void printsymtabs(void);
 void freesymtabs(void);
+
+extern int g_semantic_errors;
  
 #endif 
