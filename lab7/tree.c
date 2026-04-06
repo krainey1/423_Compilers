@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "type.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -15,6 +16,7 @@ tree_t *tree_node(const char *symbol, int prodrule, int nkids, ...) {
   t->prodrule = prodrule;
   t->nkids = nkids;
   t->id = serial++;
+  t->type = NULL;
 
   va_list ap;
   va_start(ap, nkids);
@@ -32,6 +34,7 @@ tree_t *tree_leaf(token_t *tok) {
   t->leaf = tok; // ownership: tree_free will free token
   t->symbol = "leaf";
   t->id = serial++;
+  t->type = NULL;
   return t;
 }
 
@@ -46,15 +49,20 @@ void tree_print(tree_t *t, int depth) {
 
   if (t->nkids == 0) {
     if (t->leaf && t->leaf->lexeme)
-      printf("TOKEN(%d) \"%s\" [line %d]\n", t->leaf->code, t->leaf->lexeme, t->leaf->line);
+      printf("TOKEN(%d) \"%s\" [line %d] [type=%s]\n",
+             t->leaf->code, t->leaf->lexeme, t->leaf->line, typename(t->type));
     else if (t->leaf)
-      printf("TOKEN(%d) [line %d]\n", t->leaf->code, t->leaf->line);
+      printf("TOKEN(%d) [line %d] [type=%s]\n",
+             t->leaf->code, t->leaf->line, typename(t->type));
     else
       printf("EMPTY_LEAF\n");
     return;
   }
 
-  printf("%s: %d\n", t->symbol ? t->symbol : "node", t->nkids);
+  printf("%s: %d [type=%s]\n",
+         t->symbol ? t->symbol : "node",
+         t->nkids,
+         typename(t->type));
   for (int i = 0; i < t->nkids; i++) {
     tree_print(t->kids[i], depth+1);
   }
@@ -66,6 +74,7 @@ void tree_free(tree_t *t) {
   if (t->nkids == 0) token_free(t->leaf);
   free(t);
 }
+
 /* Escape leading/trailing double quotes so dot doesn't break */
 static char *dot_escape(const char *s) {
   if (!s) return strdup("(null)");
