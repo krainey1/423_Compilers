@@ -115,3 +115,15 @@ void freesymtab(SymbolTable st)
     free(st->tbl);
     free(st);
 }
+
+//redeclared check = already exists in THIS scope
+SymbolTableEntry lookup_current_scope(SymbolTable st, const char *s)
+{
+    if (!st || !s) return NULL;
+    int h = hash(st, (char *)s);
+    for (SymbolTableEntry e = st->tbl[h]; e; e = e->next) {
+        if (strcmp(e->s, s) == 0)
+            return e;
+    }
+    return NULL;
+}
