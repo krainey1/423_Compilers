@@ -3,6 +3,9 @@
 
 #include "token.h"
 
+struct typeinfo;
+typedef struct typeinfo *typeptr;
+
 typedef struct tree {
   int prodrule;          // an integer you assign (or just 0 if you don't care)
   const char *symbol;    // optional readable name (nonterminal name)
@@ -10,6 +13,7 @@ typedef struct tree {
   struct tree *kids[9];  // assignment says up to 9 is fine
   token_t *leaf;         // if nkids==0, may be non-null token
   int id;                // unique node id for dot output
+  typeptr type;          // NEW: semantic type attached to this node
 } tree_t;
 
 tree_t *tree_node(const char *symbol, int prodrule, int nkids, ...);
