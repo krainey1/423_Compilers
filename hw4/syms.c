@@ -44,6 +44,18 @@ static const char *leaf_lexeme(struct tree *t)
     return NULL;
 }
 
+static int is_decl_context(struct tree *parent, int kid_index)
+{
+    if (!parent || !parent->symbol) return 0;
+
+    if (strcmp(parent->symbol, "varDeclaration") == 0 && kid_index == 1) return 1;
+    if (strcmp(parent->symbol, "functionDeclaration") == 0 && kid_index == 1) return 1;
+    if (strcmp(parent->symbol, "functionValueParameter") == 0 && kid_index == 0) return 1;
+    if (strcmp(parent->symbol, "forStatement") == 0 && kid_index == 2) return 1;
+
+    return 0;
+}
+
 
 typedef struct scope_node {
     SymbolTable table;
@@ -151,6 +163,89 @@ static void collect_scopes(struct tree *t, SymbolTable current)
     }
 
     for (int i = 0; i < t->nkids; i++) collect_scopes(t->kids[i], current);
+}
+
+static void check_undeclared_rec(struct tree *t, struct tree *parent, int kid_index, SymbolTable current)
+{
+    if (!t) return;
+
+    if (t->nkids == 0) {
+        if (t->leaf && t->leaf->code == IDENT && t->leaf->lexeme) {
+            if (!is_decl_context(parent, kid_index)) {
+                if (!lookupsym(current, t->leaf->lexeme)) {
+                    fprintf(stderr, "%s: semantic error: undeclared variable %s\n",
+                            current->name, t->leaf->lexeme);
+                    g_semantic_errors++;
+                }
+            }
+        }
+        return;
+    }
+
+    if (t->symbol && strcmp(t->symbol, "functionDeclaration") == 0) {
+        const char *fname = leaf_lexeme(t->kids[1]);
+        SymbolTable fn_scope = NULL;
+
+        for (ScopeNode *n = scope_list_head; n; n = n->next) {
+            if (n->table->parent == current &&
+                fname && strcmp(n->table->name, fname) == 0) {
+                fn_scope = n->table;
+                break;
+            }
+        }
+        if (!fn_scope) fn_scope = current;
+
+        for (int i = 0; i < t->nkids; i++)
+            check_undeclared_rec(t->kids[i], t, i, fn_scope);
+        return;
+    }
+
+    for (int i = 0; i < t->nkids; i++)
+        check_undeclared_rec(t->kids[i], t, i, current);
+}
+
+static void check_undeclared_rec(struct tree *t, struct tree *parent, int kid_index, SymbolTable current)
+{
+    if (!t) return;
+
+    if (t->nkids == 0) {
+        if (t->leaf && t->leaf->code == IDENT && t->leaf->lexeme) {
+            if (!is_decl_context(parent, kid_index)) {
+                if (!lookupsym(current, t->leaf->lexeme)) {
+                    fprintf(stderr, "%s: semantic error: undeclared variable %s\n",
+                            current->name, t->leaf->lexeme);
+                    g_semantic_errors++;
+                }
+            }
+        }
+        return;
+    }
+
+    if (t->symbol && strcmp(t->symbol, "functionDeclaration") == 0) {
+        const char *fname = leaf_lexeme(t->kids[1]);
+        SymbolTable fn_scope = NULL;
+
+        for (ScopeNode *n = scope_list_head; n; n = n->next) {
+            if (n->table->parent == current &&
+                fname && strcmp(n->table->name, fname) == 0) {
+                fn_scope = n->table;
+                break;
+            }
+        }
+        if (!fn_scope) fn_scope = current;
+
+        for (int i = 0; i < t->nkids; i++)
+            check_undeclared_rec(t->kids[i], t, i, fn_scope);
+        return;
+    }
+
+    for (int i = 0; i < t->nkids; i++)
+        check_undeclared_rec(t->kids[i], t, i, current);
+}
+
+void check_undeclared(struct tree *root, SymbolTable global)
+{
+    check_undeclared_rec(root, NULL, -1, global);
 }
 
 
