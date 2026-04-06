@@ -74,29 +74,18 @@ SymbolTableEntry lookupsym(SymbolTable st, const char *s)
 void printsymtab(SymbolTable st, int depth)
 {
     if (!st) return;
- 
-    #define IND(d) do { for (int _i=0;_i<(d)*3;_i++) putchar(' '); } while(0)
- 
-    const char *kind = (st->parent == NULL) ? "GLOBAL" : "LOCAL";
- 
-    IND(depth);
-    printf("[%s]  scope: \"%s\"", kind, st->name);
-    if (st->parent)
-        printf("  (enclosing: \"%s\")", st->parent->name);
-    printf("  %d entr%s\n", st->nEntries, st->nEntries == 1 ? "y" : "ies");
- 
-    if (st->nEntries == 0) {
-        IND(depth);
-        printf("         (no declarations)\n");
-    } else {
-        for (int i = 0; i < st->nBuckets; i++) {
-            for (SymbolTableEntry e = st->tbl[i]; e; e = e->next) {
-                IND(depth);
-                printf("         bucket[%2d]  %s\n", i, e->s);
-            }
+
+    if (st->parent == NULL)
+        printf("--- symbol table for: package %s ---\n", st->name);
+    else
+        printf("--- symbol table for: func %s ---\n", st->name);
+
+    for (int i = 0; i < st->nBuckets; i++) {
+        for (SymbolTableEntry e = st->tbl[i]; e; e = e->next) {
+            printf("    %s\n", e->s);
         }
     }
-    #undef IND
+    printf("---\n");
 }
 
 //freeing of course
