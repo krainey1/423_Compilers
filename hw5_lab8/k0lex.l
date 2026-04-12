@@ -46,11 +46,11 @@ char *copy_string(const char *s) {
 
 /* extra print thing inside lexer to show info is present before parsing */
 static void printtok(token_t *t) {
-   if (!t) return;
+   static int checked = 0, debug = 0;
+   if (!checked) { checked = 1; debug = (getenv("K0_LEX_DEBUG") != NULL); }
+   if (!debug || !t) return;
    fprintf(stderr, "LEX TOKEN(%d) \"%s\" [line %d]\n",
-          t->code,
-          t->lexeme ? t->lexeme : "",
-          t->line);
+           t->code, t->lexeme ? t->lexeme : "", t->line);
 }
 
 static void set_yylval_from_yytoken(int category) {
