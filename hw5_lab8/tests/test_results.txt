@@ -2,14 +2,14 @@ k0/lex1.kt
 No errors
 k0/lex10.kt
 No errors
-k0/lex11.kt:3: syntax error: syntax error
 k0/lex11.kt
-k0/lex12.kt:4: semantic error: undeclared identifier 'length'
+No errors
 k0/lex12.kt
+No errors
 k0/lex13.kt
 No errors
-k0/lex14.kt:4: semantic error: undeclared identifier 'length'
 k0/lex14.kt
+No errors
 k0/lex15.kt
 No errors
 k0/lex2.kt
@@ -30,8 +30,8 @@ k0/lex9.kt
 No errors
 k0/sem1.kt
 No errors
-k0/sem10.kt:4: semantic error: undeclared identifier 'length'
 k0/sem10.kt
+No errors
 k0/sem2.kt
 No errors
 k0/sem3.kt
@@ -56,20 +56,20 @@ k0/syn11.kt
 No errors
 k0/syn12.kt
 No errors
-k0/syn13.kt:4: semantic error: undeclared identifier 'length'
 k0/syn13.kt
+No errors
 k0/syn14.kt
 No errors
-k0/syn15.kt:4: syntax error: syntax error
 k0/syn15.kt
+No errors
 k0/syn2.kt
 No errors
 k0/syn3.kt
 No errors
 k0/syn4.kt
 No errors
-k0/syn5.kt:3: syntax error: syntax error
 k0/syn5.kt
+No errors
 k0/syn6.kt
 No errors
 k0/syn7.kt
@@ -78,8 +78,8 @@ k0/syn8.kt
 No errors
 k0/syn9.kt
 No errors
+errors/lex_bad_escape.kt:2: lexical error: illegal character
 errors/lex_bad_escape.kt
-No errors
 errors/lex_invalid_char.kt:2: lexical error: illegal character
 errors/lex_invalid_char.kt
 errors/lex_unclosed_char.kt:2: lexical error: unterminated character literal
@@ -170,7 +170,5 @@ kotlin/syn_object_decl.kt:2: syntax error: syntax error
 kotlin/syn_object_decl.kt
 kotlin/syn_sealed_class.kt:2: syntax error: syntax error
 kotlin/syn_sealed_class.kt
-kotlin/syn_string_template.kt
-No errors
 kotlin/syn_when_expr.kt:4: syntax error: syntax error
 kotlin/syn_when_expr.kt

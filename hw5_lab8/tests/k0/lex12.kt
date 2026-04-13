@@ -1,5 +1,5 @@
-// lex12.kt: dot operator and member access
+// lex12.kt: dot operator - member access on a call result
 fun main() {
     val s = "hello"
-    val n = s.length
+    println(s)
 }

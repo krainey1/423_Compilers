@@ -1,5 +1,6 @@
-// sem10.kt: elvis operator with nullable
+// sem10.kt: elvis operator with nullable string
 fun main() {
     var s: String? = null
-    val len = s?.length ?: 0
+    val result = s ?: "fallback"
+    println(result)
 }

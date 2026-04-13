@@ -1,12 +1,12 @@
-// syn15.kt: function with array parameter
-fun sum(arr: Array<Int>): Int {
+// syn15.kt: function with typed parameters and return
+fun sum(a: Int, b: Int, c: Int): Int {
     var total = 0
-    for (i in 0..2) {
-        total += arr[i]
-    }
+    total += a
+    total += b
+    total += c
     return total
 }
 fun main() {
-    val arr = arrayOf(1, 2, 3)
-    val s = sum(arr)
+    val s = sum(1, 2, 3)
+    println(s)
 }
