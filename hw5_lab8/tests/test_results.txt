@@ -1,0 +1,176 @@
+k0/lex1.kt
+No errors
+k0/lex10.kt
+No errors
+k0/lex11.kt:3: syntax error: syntax error
+k0/lex11.kt
+k0/lex12.kt:4: semantic error: undeclared identifier 'length'
+k0/lex12.kt
+k0/lex13.kt
+No errors
+k0/lex14.kt:4: semantic error: undeclared identifier 'length'
+k0/lex14.kt
+k0/lex15.kt
+No errors
+k0/lex2.kt
+No errors
+k0/lex3.kt
+No errors
+k0/lex4.kt
+No errors
+k0/lex5.kt
+No errors
+k0/lex6.kt
+No errors
+k0/lex7.kt
+No errors
+k0/lex8.kt
+No errors
+k0/lex9.kt
+No errors
+k0/sem1.kt
+No errors
+k0/sem10.kt:4: semantic error: undeclared identifier 'length'
+k0/sem10.kt
+k0/sem2.kt
+No errors
+k0/sem3.kt
+No errors
+k0/sem4.kt
+No errors
+k0/sem5.kt
+No errors
+k0/sem6.kt
+No errors
+k0/sem7.kt
+No errors
+k0/sem8.kt
+No errors
+k0/sem9.kt
+No errors
+k0/syn1.kt
+No errors
+k0/syn10.kt
+No errors
+k0/syn11.kt
+No errors
+k0/syn12.kt
+No errors
+k0/syn13.kt:4: semantic error: undeclared identifier 'length'
+k0/syn13.kt
+k0/syn14.kt
+No errors
+k0/syn15.kt:4: syntax error: syntax error
+k0/syn15.kt
+k0/syn2.kt
+No errors
+k0/syn3.kt
+No errors
+k0/syn4.kt
+No errors
+k0/syn5.kt:3: syntax error: syntax error
+k0/syn5.kt
+k0/syn6.kt
+No errors
+k0/syn7.kt
+No errors
+k0/syn8.kt
+No errors
+k0/syn9.kt
+No errors
+errors/lex_bad_escape.kt
+No errors
+errors/lex_invalid_char.kt:2: lexical error: illegal character
+errors/lex_invalid_char.kt
+errors/lex_unclosed_char.kt:2: lexical error: unterminated character literal
+errors/lex_unclosed_char.kt:3: syntax error: syntax error
+errors/lex_unclosed_char.kt
+errors/lex_unclosed_string.kt:2: lexical error: unterminated string literal
+errors/lex_unclosed_string.kt:2: syntax error: syntax error
+errors/lex_unclosed_string.kt
+errors/sem_add_boolean.kt:3: semantic error: operator '+' requires numeric type, got Boolean on left
+errors/sem_add_boolean.kt:3: semantic error: operator '+' requires numeric type, got Boolean on left
+errors/sem_add_boolean.kt
+errors/sem_and_non_boolean.kt:3: semantic error: operator '&&' requires Boolean, got Int on left
+errors/sem_and_non_boolean.kt:3: semantic error: operator '&&' requires Boolean, got Int on right
+errors/sem_and_non_boolean.kt:3: semantic error: operator '&&' requires Boolean, got Int on left
+errors/sem_and_non_boolean.kt:3: semantic error: operator '&&' requires Boolean, got Int on right
+errors/sem_and_non_boolean.kt
+errors/sem_arith_string.kt:3: semantic error: operator '*' requires numeric type, got String on left
+errors/sem_arith_string.kt:3: semantic error: operator '*' requires numeric type, got String on left
+errors/sem_arith_string.kt
+errors/sem_if_non_boolean.kt:3: semantic error: condition must be Boolean, got Int
+errors/sem_if_non_boolean.kt
+errors/sem_incr_boolean.kt:4: semantic error: ++ / -- requires numeric type, got Boolean
+errors/sem_incr_boolean.kt
+errors/sem_not_non_boolean.kt:3: semantic error: operator 'not' requires Boolean, got Int
+errors/sem_not_non_boolean.kt:3: semantic error: operator 'not' requires Boolean, got Int
+errors/sem_not_non_boolean.kt
+errors/sem_null_assign_nonnullable.kt:4: semantic error: cannot assign null to non-nullable variable 's'
+errors/sem_null_assign_nonnullable.kt
+errors/sem_null_to_nonnullable.kt:3: semantic error: cannot assign null to non-nullable variable 'óúUH‰å‰}üƒ}ü‡™'
+errors/sem_null_to_nonnullable.kt
+errors/sem_or_non_boolean.kt:3: semantic error: operator '||' requires Boolean, got String on left
+errors/sem_or_non_boolean.kt:3: semantic error: operator '||' requires Boolean, got String on right
+errors/sem_or_non_boolean.kt:3: semantic error: operator '||' requires Boolean, got String on left
+errors/sem_or_non_boolean.kt:3: semantic error: operator '||' requires Boolean, got String on right
+errors/sem_or_non_boolean.kt
+errors/sem_redeclare_fn.kt:3: semantic error: redeclared function 'foo'
+errors/sem_redeclare_fn.kt
+errors/sem_redeclare_var.kt:4: semantic error: redeclared variable 'x'
+errors/sem_redeclare_var.kt
+errors/sem_too_few_args.kt:6: semantic error: function 'add' expects 2 argument(s), got 1
+errors/sem_too_few_args.kt:6: semantic error: function 'add' expects 2 argument(s), got 1
+errors/sem_too_few_args.kt
+errors/sem_too_many_args.kt:6: semantic error: function 'greet' expects 1 argument(s), got 2
+errors/sem_too_many_args.kt
+errors/sem_type_mismatch_assign.kt:4: semantic error: type mismatch: cannot assign String to variable 'x' of type Int
+errors/sem_type_mismatch_assign.kt
+errors/sem_type_mismatch_decl.kt:3: semantic error: type mismatch: variable 'óúUH‰å‰}üƒ}ü‡™' declared Boolean but initialised with Int
+errors/sem_type_mismatch_decl.kt
+errors/sem_type_mismatch_string_int.kt:3: semantic error: type mismatch: variable 'óúUH‰å‰}üƒ}ü‡™' declared Int but initialised with String
+errors/sem_type_mismatch_string_int.kt
+errors/sem_undeclared_fn.kt:3: semantic error: undeclared identifier 'doesNotExist'
+errors/sem_undeclared_fn.kt
+errors/sem_undeclared_var.kt:3: semantic error: undeclared identifier 'ghostVar'
+errors/sem_undeclared_var.kt
+errors/sem_val_compound_assign.kt:4: semantic error: cannot reassign val 'x'
+errors/sem_val_compound_assign.kt
+errors/sem_val_reassign.kt:4: semantic error: cannot reassign val 'x'
+errors/sem_val_reassign.kt
+errors/sem_val_reassign_typed.kt:4: semantic error: cannot reassign val 'name'
+errors/sem_val_reassign_typed.kt
+errors/sem_while_non_boolean.kt:3: semantic error: condition must be Boolean, got String
+errors/sem_while_non_boolean.kt
+errors/syn_bad_var_decl.kt:2: syntax error: syntax error
+errors/syn_bad_var_decl.kt
+errors/syn_double_operator.kt:2: syntax error: syntax error
+errors/syn_double_operator.kt
+errors/syn_missing_for_in.kt:2: syntax error: syntax error
+errors/syn_missing_for_in.kt
+errors/syn_missing_fun_body.kt:2: syntax error: syntax error
+errors/syn_missing_fun_body.kt
+errors/syn_missing_rbrace.kt:4: syntax error: syntax error
+errors/syn_missing_rbrace.kt
+errors/syn_missing_rparen.kt:2: syntax error: syntax error
+errors/syn_missing_rparen.kt
+kotlin/syn_companion_object.kt:2: syntax error: syntax error
+kotlin/syn_companion_object.kt
+kotlin/syn_data_class.kt:2: syntax error: syntax error
+kotlin/syn_data_class.kt
+kotlin/syn_destructure.kt:3: syntax error: syntax error
+kotlin/syn_destructure.kt
+kotlin/syn_extension_fn.kt:2: syntax error: syntax error
+kotlin/syn_extension_fn.kt
+kotlin/syn_interface.kt:2: syntax error: syntax error
+kotlin/syn_interface.kt
+kotlin/syn_lambda.kt:3: syntax error: syntax error
+kotlin/syn_lambda.kt
+kotlin/syn_object_decl.kt:2: syntax error: syntax error
+kotlin/syn_object_decl.kt
+kotlin/syn_sealed_class.kt:2: syntax error: syntax error
+kotlin/syn_sealed_class.kt
+kotlin/syn_string_template.kt
+No errors
+kotlin/syn_when_expr.kt:4: syntax error: syntax error
+kotlin/syn_when_expr.kt

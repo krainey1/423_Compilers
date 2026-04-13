@@ -6,17 +6,24 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 COMPILER="${1:-$ROOT_DIR/k0}"
+
 PASS=0
 FAIL=0
 ERRORS=()
+
+# ----------------------------
+# LOG FILE FOR COMPILER OUTPUT
+# ----------------------------
+LOG_FILE="$SCRIPT_DIR/test_results.txt"
+: > "$LOG_FILE"
 
 run_test() {
     local file="$1"
     local expected_exit="$2"
     local label="$3"
 
-    # Run compiler; suppress both stdout and stderr
-    "$COMPILER" "$file" >/dev/null 2>/dev/null
+    # Run compiler and log ALL output (stdout + stderr)
+    "$COMPILER" "$file" >> "$LOG_FILE" 2>&1
     local actual_exit=$?
 
     if [ "$expected_exit" -eq 0 ]; then
@@ -39,7 +46,6 @@ run_test() {
 }
 
 # Move into the directory where this script lives
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR" || exit 1
 
 echo "=== k0 test runner ==="
