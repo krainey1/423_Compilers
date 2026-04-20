@@ -20,6 +20,7 @@ struct addr {
 #define R_CONST  2005 /* pseudo-region for immediate mode constants */
 #define R_NAME   2006 /* pseudo-region for source names */
 #define R_NONE   2007 /* pseudo-region for unused addresses */
+#define R_STRING 2008 //have one for strings
 
 struct instr {
    int opcode;
@@ -62,5 +63,18 @@ char *regionname(int i);
 char *opcodename(int i);
 char *pseudoname(int i);
 struct addr *genlabel();
+
+struct instr *append(struct instr *, struct instr *); //these weren't initially in the header, putting them here now
+struct instr *copylist(struct instr *);
+
+void tacprint(struct instr *l); //prototype for the tacprint req
+
+//Some helpers
+//make addr from region + integer offset 
+struct addr addr_make(int region, int offset);
+ 
+//make addr for a named symbol
+struct addr addr_name(int region, char *name);
+
 
 #endif
