@@ -1,83 +1,123 @@
 k0/lex1.kt
 No errors
+lex1.ic
 k0/lex10.kt
 No errors
+lex10.ic
 k0/lex11.kt
 No errors
+lex11.ic
 k0/lex12.kt
 No errors
+lex12.ic
 k0/lex13.kt
 No errors
+lex13.ic
 k0/lex14.kt
 No errors
+lex14.ic
 k0/lex15.kt
 No errors
+lex15.ic
 k0/lex2.kt
 No errors
+lex2.ic
 k0/lex3.kt
 No errors
+lex3.ic
 k0/lex4.kt
 No errors
+lex4.ic
 k0/lex5.kt
 No errors
+lex5.ic
 k0/lex6.kt
 No errors
+lex6.ic
 k0/lex7.kt
 No errors
+lex7.ic
 k0/lex8.kt
 No errors
+lex8.ic
 k0/lex9.kt
 No errors
+lex9.ic
 k0/sem1.kt
 No errors
+sem1.ic
 k0/sem10.kt
 No errors
+sem10.ic
 k0/sem2.kt
 No errors
+sem2.ic
 k0/sem3.kt
 No errors
+sem3.ic
 k0/sem4.kt
 No errors
+sem4.ic
 k0/sem5.kt
 No errors
+sem5.ic
 k0/sem6.kt
 No errors
+sem6.ic
 k0/sem7.kt
 No errors
+sem7.ic
 k0/sem8.kt
 No errors
+sem8.ic
 k0/sem9.kt
 No errors
+sem9.ic
 k0/syn1.kt
 No errors
+syn1.ic
 k0/syn10.kt
 No errors
+syn10.ic
 k0/syn11.kt
 No errors
+syn11.ic
 k0/syn12.kt
 No errors
+syn12.ic
 k0/syn13.kt
 No errors
+syn13.ic
 k0/syn14.kt
 No errors
+syn14.ic
 k0/syn15.kt
 No errors
+syn15.ic
 k0/syn2.kt
 No errors
+syn2.ic
 k0/syn3.kt
 No errors
+syn3.ic
 k0/syn4.kt
 No errors
+syn4.ic
 k0/syn5.kt
 No errors
+syn5.ic
 k0/syn6.kt
 No errors
+syn6.ic
 k0/syn7.kt
 No errors
+syn7.ic
 k0/syn8.kt
 No errors
+syn8.ic
 k0/syn9.kt
 No errors
+syn9.ic
 errors/lex_bad_escape.kt:2: lexical error: illegal character
 errors/lex_bad_escape.kt
 errors/lex_invalid_char.kt:2: lexical error: illegal character

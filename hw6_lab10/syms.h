@@ -10,5 +10,7 @@ void freesymtabs(void);
 
 extern int g_semantic_errors;
 void check_undeclared(struct tree *root, SymbolTable global);
+
+SymbolTable cg_find_fn_scope(SymbolTable parent, const char *fname);
  
 #endif 

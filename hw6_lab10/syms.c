@@ -690,3 +690,17 @@ void freesymtabs(void)
     scope_list_head = scope_list_tail = NULL;
     if (g_predefined) { freesymtab(g_predefined); g_predefined = NULL; }
 }
+
+//locator for functions symbol table for codegen
+SymbolTable cg_find_fn_scope(SymbolTable parent, const char *fname)
+{
+    if (!fname) return NULL;
+    for (ScopeNode *n = scope_list_head; n; n = n->next) {
+        if (n->table->parent == parent &&
+            n->table->name   &&
+            strcmp(n->table->name, fname) == 0)
+            return n->table;
+    }
+    return NULL;
+}
+ 

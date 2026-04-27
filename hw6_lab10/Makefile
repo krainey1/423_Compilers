@@ -3,8 +3,8 @@ CFLAGS=-Wall -g
 
 all: k0
 
-k0: k0gram.tab.c lex.yy.c lex.yy.o k0gram.tab.o main.o tree.o token.o symtab.o syms.o 
-	$(CC) $(CFLAGS) -o k0 k0gram.tab.o lex.yy.o main.o tree.o token.o symtab.o syms.o
+k0: k0gram.tab.c lex.yy.c lex.yy.o k0gram.tab.o main.o tree.o token.o symtab.o syms.o i_code.o codegen.o
+	$(CC) $(CFLAGS) -o k0 k0gram.tab.o lex.yy.o main.o tree.o token.o symtab.o syms.o i_code.o codegen.o
 
 k0gram.tab.c k0gram.tab.h: k0gram.y
 	bison -d -v k0gram.y
@@ -12,7 +12,7 @@ k0gram.tab.c k0gram.tab.h: k0gram.y
 lex.yy.c: k0lex.l k0gram.tab.h tree.h
 	flex k0lex.l
 
-main.o: main.c tree.h symtab.h syms.h
+main.o: main.c tree.h symtab.h syms.h i_code.h codegen.h
 	$(CC) $(CFLAGS) -c main.c
 
 tree.o: tree.c tree.h token.h
@@ -27,6 +27,12 @@ symtab.o: symtab.c symtab.h
 syms.o: syms.c syms.h tree.h token.h symtab.h
 	$(CC) $(CFLAGS) -c syms.c
 
+i_code.o: i_code.c i_code.h
+	$(CC) $(CFLAGS) -c i_code.c
+
+codegen.o: codegen.c codegen.h i_code.h tree.h symtab.h k0gram.tab.h
+	$(CC) $(CFLAGS) -c codegen.c
+
 k0gram.tab.o: k0gram.tab.c
 	$(CC) $(CFLAGS) -c k0gram.tab.c
 
@@ -34,4 +40,4 @@ lex.yy.o: lex.yy.c
 	$(CC) $(CFLAGS) -c lex.yy.c
 
 clean:
-	rm -f k0 *.o k0gram.tab.c k0gram.tab.h lex.yy.c k0gram.output
+	rm -f k0 *.o k0gram.tab.c k0gram.tab.h lex.yy.c k0gram.output *.ic

@@ -5,6 +5,9 @@
 #include "tree.h"
 #include "symtab.h"
 #include "syms.h"
+#include "i_code.h"
+#include "codegen.h"
+
 
 extern FILE *yyin;
 extern int yyparse(void);
@@ -52,7 +55,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    /* assignment requirement: print filename to stdout when opened */
     printf("%s\n", source_file);
 
     int parse_rc = yyparse();
@@ -112,6 +114,20 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nprintsyms:\n");
     printsyms(g_root);
     */
+
+    //codegen
+    icode_list_t *str_seg = NULL;
+    icode_list_t *dat_seg = NULL;
+    icode_list_t *code    = codegen(g_root, global, &str_seg, &dat_seg);
+ 
+    char *ic_file = make_ic_filename(source_file);
+    printf("%s\n", ic_file);  //output file name
+    icode_emit(code, ic_file, str_seg, dat_seg);
+ 
+    icode_free(code);
+    icode_free(str_seg);
+    icode_free(dat_seg);
+    free(ic_file);
 
     freesymtabs();
     tree_free(g_root);
