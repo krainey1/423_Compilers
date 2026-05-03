@@ -1,0 +1,4 @@
+fun foo()
+fun main() {
+    foo()
+}
