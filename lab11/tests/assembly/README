@@ -1,0 +1,189 @@
+# Lab 11 Notes — Reverse Engineering x86-64 Assembly
+# GCC 15.2.0 on Windows/MSYS2 (UCRT64)
+# Source language: k0 (Kotlin subset)
+
+# We went through and made comments in every assembly file in the following order:
+# test.s
+# hello.s
+# arith.s
+# calls.s
+# control.s
+# So in the latter files, some areas of code aren't commented/analyzed on if they're pretty general, and
+# if they've already been addressed in previous files.
+
+# SECTION 1: KEY DIFFERENCES — Windows/MSYS2 vs Linux (from assignment examples)
+#
+# The assignment examples were produced on Linux with GCC 7-11.
+# Our output is from GCC 15.2.0 on Windows (MSYS2/UCRT64).
+# These differences matter and must be accounted for in x86gen.c at least a bit:
+#
+# DIFFERENCE 1: Calling Convention (CRITICAL for OP_PARM / OP_CALL)
+#
+#   Linux x86-64 System V ABI:
+#     arg1=%rdi, arg2=%rsi, arg3=%rdx, arg4=%rcx, arg5=%r8, arg6=%r9
+#
+#   Windows x64 ABI (what our gcc produces):
+#     arg1=%rcx, arg2=%rdx, arg3=%r8,  arg4=%r9
+#
+#   This means for OP_PARM, the register mapping is completely different.
+#   Our x86gen.c must use Windows registers if targeting Windows.
+#
+# DIFFERENCE 2: Shadow Space (Windows only)
+#
+#   Windows requires the CALLER to allocate 32 bytes of "shadow space"
+#   on the stack before every call, even if there are fewer than 4 args.
+#   This is why we see:  subq $32, %rsp  in every function that makes calls.
+#   Linux has no shadow space requirement. We made note of this in some assembly file comments.
+#
+# DIFFERENCE 3: Read-only Data Section Name
+#
+#   Linux:   .section .rodata
+#   Windows: .section .rdata,"dr"
+#
+# DIFFERENCE 4: Function Debug Annotations
+#
+#   Linux:   .cfi_startproc / .cfi_endproc / .cfi_def_cfa_offset etc.
+#   Windows: .seh_proc / .seh_endproc / .seh_pushreg / .seh_setframe etc.
+#   Both are just annotations for the debugger/exception handler — the
+#   actual instructions between them are the same though.
+#
+# DIFFERENCE 5: String Directive
+#
+#   Linux:   .string "hello"     (null terminator added automatically)
+#   Windows: .ascii  "hello\0"   (null terminator explicit)
+#
+# DIFFERENCE 6: Global Variable Declaration
+#
+#   Assignment (Linux): .comm x,8,8   (name, size, alignment — one line)
+#   Our output:         .globl x / .bss / .align 4 / x: / .space 4
+#
+# DIFFERENCE 7: Instruction Sizes (int vs long)
+#
+#   C 'int' is 4 bytes -> gcc uses movl, addl, subl, imull (32-bit suffix)
+#   The TAC uses WORD_SIZE=8 (64-bit) -> x86gen.c should use movq, addq etc.
+#   When generating for TAC, have to use 'q' suffix (64-bit) throughout.
+#
+# DIFFERENCE 8: __main call (Windows only)
+#
+#   Windows gcc inserts "call __main" at the start of main() to init the
+#   C runtime. Not present on Linux. Can be ignored for our purposes rn.
+
+# =============================================================================
+# SECTION 2: UPDATED FINAL CODE GENERATION GUIDE
+#            (our gcc version, Windows/MSYS2, 64-bit TAC variables)
+# =============================================================================
+#
+# TAC Instruction          x86-64 Assembly (Windows, 64-bit)
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# OP_GLOBAL x          ->  .globl x
+#                          .bss
+#                          .align 8
+#                          x:
+#                          .space 8
+#
+# OP_STRING offset,str ->  .section .rdata,"dr"
+#                          .LCn:
+#                          .ascii "str\0"
+#
+# OP_PROC fname        ->  .globl fname
+#                          .def fname; .scl 2; .type 32; .endef
+#                          .seh_proc fname
+#                          fname:
+#                          pushq %rbp
+#                          .seh_pushreg %rbp
+#                          movq %rsp, %rbp
+#                          .seh_setframe %rbp, 0
+#                          subq $N, %rsp        # N = frame size, 16-byte aligned, min 32
+#                          .seh_stackalloc N
+#                          .seh_endprologue
+#
+# OP_ENDPROC fname     ->  addq $N, %rsp
+#                          popq %rbp
+#                          ret
+#                          .seh_endproc
+#
+# OP_ASSIGN dst,src    ->  movq src_loc, %rax
+#  (local variables)       movq %rax, dst_loc
+#                          (note: no direct memory-to-memory mov)
+#
+# OP_ASSIGN dst,const  ->  movq $const, dst_loc
+#
+# OP_ADD_INT dst,a,b   ->  movq a_loc, %rdx
+#                          movq b_loc, %rax
+#                          addq %rdx, %rax
+#                          movq %rax, dst_loc
+#
+# OP_SUB_INT dst,a,b   ->  movq a_loc, %rdx
+#                          movq b_loc, %rax
+#                          subq %rax, %rdx      # rdx = a - b
+#                          movq %rdx, dst_loc
+#
+# OP_MUL_INT dst,a,b   ->  movq a_loc, %rdx
+#                          movq b_loc, %rax
+#                          imulq %rdx, %rax
+#                          movq %rax, dst_loc
+#
+# OP_DIV_INT dst,a,b   ->  movq a_loc, %rax
+#                          cqto                 # sign-extend rax into rdx:rax
+#                          idivq b_loc          # quotient -> %rax
+#                          movq %rax, dst_loc
+#
+# OP_NEG_INT dst,src   ->  movq src_loc, %rax
+#                          negq %rax
+#                          movq %rax, dst_loc
+#
+# OP_LABEL Ln          ->  .Ln:
+#
+# OP_JUMP Ln           ->  jmp .Ln
+#
+# OP_JUMP_TRUE val,Ln  ->  cmpq $0, val_loc
+#                          jne .Ln
+#
+# OP_JUMP_FALSE val,Ln ->  cmpq $0, val_loc
+#                          je  .Ln
+#
+# OP_LT_INT dst,a,b    ->  cmpq b_loc, a_loc   (sets flags)
+#                          jl  .Ltrue
+#                          (store 0 or 1 into dst accordingly)
+#
+# Condition code jump mapping (inverted, gcc jumps to SKIP the then-block):
+#   >  gt  ->  jle to skip       <  lt  ->  jge to skip
+#   >= gte ->  jl  to skip       <= lte ->  jg  to skip
+#   == eq  ->  jne to skip       != neq ->  je  to skip
+#
+# OP_PARM (Windows x64 — arg register order):
+#   param 1  ->  movq val, %rcx
+#   param 2  ->  movq val, %rdx
+#   param 3  ->  movq val, %r8
+#   param 4  ->  movq val, %r9
+#   param 5+ ->  pushq val  (onto stack, right to left)
+#
+# OP_PARM (Linux — for reference, from assignment table):
+#   param 1  ->  movq val, %rdi
+#   param 2  ->  movq val, %rsi
+#   param 3  ->  movq val, %rdx
+#   param 4  ->  movq val, %rcx
+#   param 5  ->  movq val, %r8
+#   param 6  ->  movq val, %r9
+#
+# OP_CALL fname,n,dst  ->  call fname
+#                          movq %rax, dst_loc   # save return value
+#
+# OP_RETURN val        ->  movq val_loc, %rax
+#                          (fall through to epilogue)
+#
+# OP_RETURN (void)     ->  (just fall through to epilogue)
+#
+# Local variable addressing:
+#   First local  -> -8(%rbp)
+#   Second local -> -16(%rbp)
+#   Nth local    -> -(N*8)(%rbp)
+#   (each slot is 8 bytes for 64-bit TAC)
+#
+# Global variable addressing:
+#   varname(%rip)   — RIP-relative, used for all global reads/writes
+#
+# String constant addressing:
+#   leaq .LCn(%rip), %reg   — load address of string, not the string itself
+
