@@ -56,7 +56,7 @@ main:					# TAC: have this as proc main
 					# Windows arg order: arg1=%rcx, arg2=%rdx		
 	call	printf			# TAC: OP_CALL printf, 2
 	nop				# padding stuff
-	addq	$32, %rsp		$ dealloc the shadow space
+	addq	$32, %rsp		# dealloc the shadow space
 	popq	%rbp			# restore base pointer
 	ret				# TAC: OP_ENDPROC main
 	.seh_endproc

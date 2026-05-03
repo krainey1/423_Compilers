@@ -10,6 +10,9 @@
 # control.s
 # So in the latter files, some areas of code aren't commented/analyzed on if they're pretty general, and
 # if they've already been addressed in previous files.
+# Also note: linking step from assignment uses Linux-specific library paths which isn't reproducible on Windows/MSYS2
+# Assembly and object file gen were completed successfully though so the .o files are included.
+
 
 # SECTION 1: KEY DIFFERENCES — Windows/MSYS2 vs Linux (from assignment examples)
 #
