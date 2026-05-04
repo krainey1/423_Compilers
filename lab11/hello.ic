@@ -1,0 +1,8 @@
+.string	14
+	Hello, World!\000
+.code
+main:
+	addr	loc:0,string:0
+	parm	loc:0
+	call	println,1,loc:8
+	; end main
