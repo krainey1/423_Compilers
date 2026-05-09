@@ -1,0 +1,17 @@
+#ifndef SYMS_H
+#define SYMS_H
+ 
+#include "tree.h"
+#include "symtab.h"
+void printsyms(struct tree *t);
+SymbolTable buildsymtabs(struct tree *root, const char *filename);
+void printsymtabs(void);
+void freesymtabs(void);
+
+extern int g_semantic_errors;
+void check_undeclared(struct tree *root, SymbolTable global);
+void stamp_types(struct tree *root, SymbolTable global);
+
+SymbolTable cg_find_fn_scope(SymbolTable parent, const char *fname);
+ 
+#endif 
