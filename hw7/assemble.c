@@ -1,5 +1,5 @@
 /*
- * asm_gen.c  --  x86-64 AT&T syntax (Linux) final code generator
+ * assemble.c  --  x86-64 AT&T syntax (Linux) final code generator
  *
  * Translates the three-address intermediate code produced by codegen.c
  * into GNU/Linux x86-64 assembly that can be assembled and linked by gcc.
@@ -14,7 +14,7 @@
 #include "i_code.h"
 
 
-// Emit a formatted line with a leading tab 
+/* Emit a formatted line with a leading tab */
 static void emit(FILE *f, const char *fmt, ...)
 {
     va_list ap;
@@ -25,7 +25,7 @@ static void emit(FILE *f, const char *fmt, ...)
     va_end(ap);
 }
 
-// Emit a label (no leading tab) 
+/* Emit a label (no leading tab) */
 static void emit_label(FILE *f, const char *fmt, ...)
 {
     va_list ap;
@@ -35,7 +35,7 @@ static void emit_label(FILE *f, const char *fmt, ...)
     va_end(ap);
 }
 
-// Emit a comment 
+/* Emit a comment */
 static void emit_comment(FILE *f, const char *fmt, ...)
 {
     va_list ap;
@@ -51,10 +51,6 @@ static void emit_comment(FILE *f, const char *fmt, ...)
  * loc:0  -> -8(%rbp)
  * loc:8  -> -16(%rbp)
  * loc:N  -> -(N+8)(%rbp)
- *
- * Params are passed in registers; after the prologue we spill them into
- * the frame starting right after locals.  For simplicity we treat
- * param:N the same as loc:N here -- the caller already pushed them.
  */
 static void rbp_offset(addr_t a, char *buf, int sz)
 {
@@ -68,7 +64,6 @@ static void rbp_offset(addr_t a, char *buf, int sz)
 
 /*
  * Load an addr_t into %rax.
- * Handles: R_LOCAL, R_PARAM, R_CONST, R_STRING (pointer), R_GLOBAL.
  */
 static void load_to_rax(FILE *f, addr_t a)
 {
@@ -147,22 +142,52 @@ static const char *arg_regs[] = {
 };
 #define MAX_REG_ARGS 6
 
-#define STR_PTR_MAX 256
-static long str_ptr_slots[STR_PTR_MAX];
+/* -----------------------------------------------------------------------
+ * String-pointer tracking:
+ * We track which local/global slots hold char* values (string pointers)
+ * so that println/print can decide between puts and printf.
+ * We track by (region, offset) pairs.
+ * ---------------------------------------------------------------------- */
+#define STR_PTR_MAX 512
+typedef struct {
+    region_t region;
+    long     offset;
+} str_ptr_entry_t;
+
+static str_ptr_entry_t str_ptr_table[STR_PTR_MAX];
 static int  str_ptr_count = 0;
 
 static void str_ptr_reset(void) { str_ptr_count = 0; }
 
-static void str_ptr_record(long offset)
+static void str_ptr_record(region_t region, long offset)
 {
-    if (str_ptr_count < STR_PTR_MAX)
-        str_ptr_slots[str_ptr_count++] = offset;
+    /* avoid duplicates */
+    for (int i = 0; i < str_ptr_count; i++)
+        if (str_ptr_table[i].region == region &&
+            str_ptr_table[i].offset == offset)
+            return;
+    if (str_ptr_count < STR_PTR_MAX) {
+        str_ptr_table[str_ptr_count].region = region;
+        str_ptr_table[str_ptr_count].offset = offset;
+        str_ptr_count++;
+    }
 }
 
-static int str_ptr_is_string(long offset)
+static int str_ptr_is_string(region_t region, long offset)
 {
     for (int i = 0; i < str_ptr_count; i++)
-        if (str_ptr_slots[i] == offset) return 1;
+        if (str_ptr_table[i].region == region &&
+            str_ptr_table[i].offset == offset)
+            return 1;
+    return 0;
+}
+
+/* Helper: is this addr a string pointer? */
+static int addr_is_string(addr_t a)
+{
+    if (a.region == R_STRING) return 1;
+    if (a.region == R_LOCAL || a.region == R_PARAM || a.region == R_GLOBAL)
+        return str_ptr_is_string(a.region, a.offset);
     return 0;
 }
 
@@ -180,7 +205,6 @@ static long compute_frame_size(instr_t *proc_instr)
     long max_off = 0;
     for (instr_t *i = proc_instr ? proc_instr->next : NULL; i; i = i->next) {
         if (i->op == OP_ENDPROC) break;
-        /* Check all three operand slots */
         addr_t ops[3] = { i->dst, i->src1, i->src2 };
         for (int k = 0; k < 3; k++) {
             if (ops[k].region == R_LOCAL || ops[k].region == R_PARAM) {
@@ -189,16 +213,22 @@ static long compute_frame_size(instr_t *proc_instr)
             }
         }
     }
-    /* Round up to 16-byte alignment: frame = max_off + 8 (saved rbp already
-       pushed), then align total RSP to 16.  We just align max_off to 16. */
-    if (max_off == 0) max_off = 8; /* at least one slot */
+    if (max_off == 0) max_off = 8;
     /* Align to 16 */
     max_off = (max_off + 15) & ~15L;
     return max_off;
 }
 
+static int count_params(instr_t *proc_instr)
+{
+    /* We embed nparams in the PROC instruction's src1.offset */
+    if (proc_instr && proc_instr->op == OP_PROC)
+        return (int)proc_instr->src1.offset;
+    return 0;
+}
+
 /* -----------------------------------------------------------------------
- * Pending PARM queue (up to 6 reg args)
+ * Pending PARM queue (up to MAX_PARMS args)
  * ---------------------------------------------------------------------- */
 #define MAX_PARMS 32
 static addr_t parm_queue[MAX_PARMS];
@@ -213,8 +243,36 @@ static void parm_push(addr_t a)
 }
 
 /*
+ * Load a single address into a given register string.
+ */
+static void load_to_reg(FILE *f, addr_t a, const char *reg)
+{
+    char slot[64];
+    switch (a.region) {
+    case R_LOCAL:
+    case R_PARAM:
+        rbp_offset(a, slot, sizeof slot);
+        emit(f, "movq %s, %s", slot, reg);
+        break;
+    case R_CONST:
+    case R_IMMED:
+        emit(f, "movq $%ld, %s", a.offset, reg);
+        break;
+    case R_STRING:
+        emit(f, "leaq __str%ld(%%rip), %s", a.offset, reg);
+        break;
+    case R_GLOBAL:
+        emit(f, "movq __gv%ld(%%rip), %s", a.offset, reg);
+        break;
+    default:
+        break;
+    }
+}
+
+/*
  * Flush parms into argument registers before a CALL.
- * Returns 1 if any arg was a string (so we know to use puts vs printf).
+ * SysV: first arg -> %rdi, second -> %rsi, etc.
+ * Returns 1 if any arg was a string.
  */
 static int parm_flush(FILE *f)
 {
@@ -222,28 +280,13 @@ static int parm_flush(FILE *f)
     int n = parm_count < MAX_REG_ARGS ? parm_count : MAX_REG_ARGS;
     for (int k = 0; k < n; k++) {
         addr_t a = parm_queue[k];
-        if (a.region == R_STRING) has_string = 1;
-        /* Load each parm into its arg register */
-        char slot[64];
-        switch (a.region) {
-        case R_LOCAL:
-        case R_PARAM:
-            rbp_offset(a, slot, sizeof slot);
-            emit(f, "movq %s, %s", slot, arg_regs[k]);
-            break;
-        case R_CONST:
-        case R_IMMED:
-            emit(f, "movq $%ld, %s", a.offset, arg_regs[k]);
-            break;
-        case R_STRING:
-            emit(f, "leaq __str%ld(%%rip), %s", a.offset, arg_regs[k]);
-            break;
-        case R_GLOBAL:
-            emit(f, "movq __gv%ld(%%rip), %s", a.offset, arg_regs[k]);
-            break;
-        default:
-            break;
-        }
+        if (addr_is_string(a)) has_string = 1;
+        load_to_reg(f, a, arg_regs[k]);
+    }
+    /* Stack args (beyond 6) pushed right-to-left */
+    for (int k = parm_count - 1; k >= MAX_REG_ARGS; k--) {
+        load_to_rax(f, parm_queue[k]);
+        emit(f, "pushq %%rax");
     }
     parm_reset();
     return has_string;
@@ -277,6 +320,23 @@ static void emit_instr(FILE *f, instr_t *instr)
         emit(f, "movq %%rsp, %%rbp");
         if (g_frame_size > 0)
             emit(f, "subq $%ld, %%rsp", g_frame_size);
+
+        /* Spill parameter registers into their frame slots.
+         * The nparams count is stored in src1.offset of the PROC instr. */
+        int nparams = count_params(instr);
+        /* Parameters are assigned offsets 0, 8, 16, ... by codegen.
+         * Slot for param k: offset = k * 8, frame slot = -(k*8 + 8)(%rbp) */
+        for (int k = 0; k < nparams && k < MAX_REG_ARGS; k++) {
+            long off = (long)k * 8;
+            char slot[64];
+            addr_t pa;
+            pa.region = R_LOCAL;
+            pa.offset = off;
+            rbp_offset(pa, slot, sizeof slot);
+            emit(f, "movq %s, %s", arg_regs[k], slot);
+            /* Mark these slots as potentially string pointers if reg was str */
+            /* (We can't know statically; caller marks them via OP_ADDR)     */
+        }
         break;
     }
 
@@ -307,6 +367,12 @@ static void emit_instr(FILE *f, instr_t *instr)
     case OP_ASSIGN:
         load_to_rax(f, instr->src1);
         store_from_rax(f, instr->dst);
+        /* Propagate string-pointer attribute through assignments */
+        if (addr_is_string(instr->src1) &&
+            (instr->dst.region == R_LOCAL || instr->dst.region == R_PARAM ||
+             instr->dst.region == R_GLOBAL)) {
+            str_ptr_record(instr->dst.region, instr->dst.offset);
+        }
         break;
 
     /* ------------------------------------------------------------------ */
@@ -314,9 +380,9 @@ static void emit_instr(FILE *f, instr_t *instr)
     case OP_ADDR:
         if (instr->src1.region == R_STRING) {
             emit(f, "leaq __str%ld(%%rip), %%rax", instr->src1.offset);
-            /* record that dst slot holds a string pointer */
-            if (instr->dst.region == R_LOCAL || instr->dst.region == R_PARAM)
-                str_ptr_record(instr->dst.offset);
+            if (instr->dst.region == R_LOCAL || instr->dst.region == R_PARAM ||
+                instr->dst.region == R_GLOBAL)
+                str_ptr_record(instr->dst.region, instr->dst.offset);
         } else if (instr->src1.region == R_LOCAL || instr->src1.region == R_PARAM) {
             rbp_offset(instr->src1, src1_slot, sizeof src1_slot);
             emit(f, "leaq %s, %%rax", src1_slot);
@@ -351,12 +417,12 @@ static void emit_instr(FILE *f, instr_t *instr)
         break;
 
     case OP_DIV_INT:
-        /* Load divisor into %rcx first (before cqto trashes %rdx) */
+        /* Load divisor into %rcx before cqto trashes %rdx */
         load_to_rdx(f, instr->src2);
         emit(f, "movq %%rdx, %%rcx");
         load_to_rax(f, instr->src1);
-        emit(f, "cqto");              /* sign-extend %rax -> %rdx:%rax */
-        emit(f, "idivq %%rcx");       /* %rax = quotient */
+        emit(f, "cqto");
+        emit(f, "idivq %%rcx");
         store_from_rax(f, instr->dst);
         break;
 
@@ -366,7 +432,7 @@ static void emit_instr(FILE *f, instr_t *instr)
         load_to_rax(f, instr->src1);
         emit(f, "cqto");
         emit(f, "idivq %%rcx");
-        emit(f, "movq %%rdx, %%rax"); /* remainder in %rdx */
+        emit(f, "movq %%rdx, %%rax");   /* remainder in %rdx */
         store_from_rax(f, instr->dst);
         break;
 
@@ -477,25 +543,22 @@ static void emit_instr(FILE *f, instr_t *instr)
      *   Flush queued parms into registers, then emit call.
      *
      *   Built-in mapping (Kotlin -> libc):
-     *     println(str) -> puts(str)
-     *     println(int) -> printf with "%ld\n" format
-     *     print(str)   -> printf(str)    (no newline)
+     *     println(str)  -> puts(str)
+     *     println(int)  -> printf with "%ld\n" format
+     *     println()     -> puts("")
+     *     print(str)    -> printf("%s", str)  (no newline)
+     *     print(int)    -> printf("%ld", val)
+     *     readLine()    -> ... (stub)
      */
     case OP_CALL: {
         const char *callee = instr->name ? instr->name : "unknown";
 
-        /* Is this println / print? */
         int is_println = (strcmp(callee, "println") == 0);
         int is_print   = (strcmp(callee, "print")   == 0);
 
         if (is_println || is_print) {
-            /*
-             * peek at what is queued:
-             *  - 0 args  -> puts("")
-             *  - 1 string arg -> puts(str)  [println]  / printf("%s",str) [print]
-             *  - 1 non-string -> printf("%ld\n", val)
-             */
             if (parm_count == 0) {
+                /* println() with no args -> puts("") */
                 if (is_println) {
                     emit(f, "leaq __empty_str(%%rip), %%rdi");
                     emit(f, "call puts@PLT");
@@ -504,73 +567,38 @@ static void emit_instr(FILE *f, instr_t *instr)
                 addr_t arg = parm_queue[0];
                 parm_reset();
 
-                if (arg.region == R_STRING) {
-                    /* String literal: use puts for println, printf for print */
-                    emit(f, "leaq __str%ld(%%rip), %%rdi", arg.offset);
+                int arg_is_str = addr_is_string(arg);
+
+                if (arg_is_str) {
+                    /* String pointer: load into %rdi */
+                    if (arg.region == R_STRING) {
+                        emit(f, "leaq __str%ld(%%rip), %%rdi", arg.offset);
+                    } else {
+                        load_to_reg(f, arg, "%rdi");
+                    }
                     if (is_println)
                         emit(f, "call puts@PLT");
                     else {
                         emit(f, "xorl %%eax, %%eax");
                         emit(f, "call printf@PLT");
                     }
-                } else if (arg.region == R_LOCAL || arg.region == R_PARAM) {
-                    /*
-                     * Check if this local slot holds a string pointer
-                     * (set by a preceding OP_ADDR dst=loc:T, src1=string:S).
-                     * If so, call puts/printf with it as a char*.
-                     * Otherwise treat it as an integer and use printf.
-                     */
-                    rbp_offset(arg, src1_slot, sizeof src1_slot);
-                    if (str_ptr_is_string(arg.offset)) {
-                        /* String pointer path */
-                        emit(f, "movq %s, %%rdi", src1_slot);
-                        if (is_println)
-                            emit(f, "call puts@PLT");
-                        else {
-                            emit(f, "xorl %%eax, %%eax");
-                            emit(f, "call printf@PLT");
-                        }
-                    } else {
-                        /* Integer path */
-                        if (is_println)
-                            emit(f, "leaq __fmt_int_ln(%%rip), %%rdi");
-                        else
-                            emit(f, "leaq __fmt_int(%%rip), %%rdi");
-                        emit(f, "movq %s, %%rsi", src1_slot);
-                        emit(f, "xorl %%eax, %%eax");
-                        emit(f, "call printf@PLT");
-                    }
                 } else {
-                    /* Integer / constant: use printf with format string */
+                    /* Integer / boolean: use printf with format string */
                     if (is_println)
                         emit(f, "leaq __fmt_int_ln(%%rip), %%rdi");
                     else
                         emit(f, "leaq __fmt_int(%%rip), %%rdi");
-
-                    switch (arg.region) {
-                    case R_CONST:
-                    case R_IMMED:
-                        emit(f, "movq $%ld, %%rsi", arg.offset);
-                        break;
-                    case R_GLOBAL:
-                        emit(f, "movq __gv%ld(%%rip), %%rsi", arg.offset);
-                        break;
-                    default:
-                        load_to_rax(f, arg);
-                        emit(f, "movq %%rax, %%rsi");
-                        break;
-                    }
+                    load_to_reg(f, arg, "%rsi");
                     emit(f, "xorl %%eax, %%eax");
                     emit(f, "call printf@PLT");
                 }
             }
 
-            /* Store return value if destination is not R_NONE */
             if (instr->dst.region != R_NONE)
                 store_from_rax(f, instr->dst);
 
         } else {
-            /* General function call */
+            /* General function call: flush params into registers */
             parm_flush(f);
             emit(f, "xorl %%eax, %%eax");   /* clear AL (no SSE args) */
             emit(f, "call %s@PLT", callee);
@@ -581,10 +609,24 @@ static void emit_instr(FILE *f, instr_t *instr)
     }
 
     /* ------------------------------------------------------------------ */
-    /* Global declaration: handled separately in the .bss section */
+    /* Memory load */
+    case OP_LOAD:
+        load_to_rax(f, instr->src1);
+        emit(f, "movq (%%rax), %%rax");
+        store_from_rax(f, instr->dst);
+        break;
+
+    /* Memory store */
+    case OP_STORE:
+        load_to_rax(f, instr->src1);
+        load_to_rdx(f, instr->dst);
+        emit(f, "movq %%rax, (%%rdx)");
+        break;
+
+    /* ------------------------------------------------------------------ */
+    /* Global declaration and string: handled in the section pass */
     case OP_GLOBAL:
     case OP_STRING:
-        /* emitted in the rodata/bss pass, not here */
         break;
 
     /* ------------------------------------------------------------------ */
@@ -597,17 +639,16 @@ static void emit_instr(FILE *f, instr_t *instr)
 
 /* -----------------------------------------------------------------------
  * make_asm_filename
+ * Preserves the directory of source_file, replaces .kt extension with .s
  * ---------------------------------------------------------------------- */
 char *make_asm_filename(const char *source_file)
 {
     if (!source_file) return strdup("out.s");
 
-    const char *base = strrchr(source_file, '/');
-    base = base ? base + 1 : source_file;
-
-    char *out = strdup(base);
+    char *out = strdup(source_file);
     char *dot = strrchr(out, '.');
-    if (dot) strcpy(dot, ".s");
+    if (dot && strcmp(dot, ".kt") == 0)
+        strcpy(dot, ".s");
     else {
         char *tmp = malloc(strlen(out) + 3);
         sprintf(tmp, "%s.s", out);
@@ -617,6 +658,9 @@ char *make_asm_filename(const char *source_file)
     return out;
 }
 
+/* -----------------------------------------------------------------------
+ * asm_gen  --  top-level entry point
+ * ---------------------------------------------------------------------- */
 void asm_gen(icode_list_t *code,
              icode_list_t *str_seg,
              icode_list_t *dat_seg,
@@ -631,17 +675,16 @@ void asm_gen(icode_list_t *code,
     fprintf(f, "\t# k0 compiler -- x86-64 AT&T Linux\n\n");
 
     /* ------------------------------------------------------------------ */
-    /* .rodata: string literals */
-    int has_strings    = str_seg && str_seg->head;
-    int need_fmt_int   = 0;   /* set if any int println is encountered */
-    int need_empty_str = 0;   /* set if 0-arg println is encountered   */
+    /* Scan code to determine what format strings we need */
+    int need_fmt_int   = 0;
+    int need_empty_str = 0;
 
-    /* Scan for format string needs */
     if (code) {
         for (instr_t *i = code->head; i; i = i->next) {
             if (i->op == OP_CALL) {
-                if (i->name && (strcmp(i->name, "println") == 0 ||
-                                strcmp(i->name, "print")   == 0)) {
+                if (i->name &&
+                    (strcmp(i->name, "println") == 0 ||
+                     strcmp(i->name, "print")   == 0)) {
                     need_fmt_int   = 1;
                     need_empty_str = 1;
                 }
@@ -649,16 +692,15 @@ void asm_gen(icode_list_t *code,
         }
     }
 
+    /* ------------------------------------------------------------------ */
+    /* .rodata: string literals */
     fprintf(f, "\t.section .rodata\n");
 
-    /* Emit each string literal as __str<byte_offset>: */
-    if (has_strings) {
+    if (str_seg) {
         for (instr_t *i = str_seg->head; i; i = i->next) {
             if (i->op != OP_STRING || !i->sval) continue;
             fprintf(f, "__str%ld:\n", i->dst.offset);
             fprintf(f, "\t.string \"");
-            /* Re-encode the string: sval has already been unquoted by
-               add_string_const; we need to escape it for .string */
             for (const char *p = i->sval; *p; p++) {
                 unsigned char c = (unsigned char)*p;
                 if      (c == '"')  fprintf(f, "\\\"");
@@ -675,7 +717,6 @@ void asm_gen(icode_list_t *code,
         }
     }
 
-    /* Format strings for printf-based println */
     if (need_fmt_int) {
         fprintf(f, "__fmt_int_ln:\n\t.string \"%%ld\\n\"\n");
         fprintf(f, "__fmt_int:\n\t.string \"%%ld\"\n");
@@ -691,8 +732,6 @@ void asm_gen(icode_list_t *code,
         fprintf(f, "\t.bss\n");
         for (instr_t *i = dat_seg->head; i; i = i->next) {
             if (i->op != OP_GLOBAL) continue;
-            /* Use __gv<offset> as the asm symbol, but also expose the
-               programmer name via a .set alias if we have it. */
             fprintf(f, "\t.globl __gv%ld\n", i->dst.offset);
             fprintf(f, "\t.align 8\n");
             fprintf(f, "__gv%ld:\n", i->dst.offset);
@@ -709,21 +748,74 @@ void asm_gen(icode_list_t *code,
 
     parm_reset();
     g_frame_size = 0;
+    str_ptr_reset();
 
     if (code) {
         for (instr_t *i = code->head; i; i = i->next) {
             emit_instr(f, i);
         }
     }
+    {
+        /* Collect defined function names */
+        const char *defined[128];
+        int ndef = 0;
+        /* Also known external symbols (libc) */
+        const char *known_extern[] = {
+            "println", "print", "puts", "printf", "scanf",
+            "malloc", "free", "exit", "readLine", NULL
+        };
+
+        if (code) {
+            for (instr_t *i = code->head; i; i = i->next) {
+                if (i->op == OP_PROC && i->name && ndef < 128)
+                    defined[ndef++] = i->name;
+            }
+        }
+
+        /* Find calls to undefined functions */
+        int stubs_emitted = 0;
+        if (code) {
+            for (instr_t *i = code->head; i; i = i->next) {
+                if (i->op != OP_CALL || !i->name) continue;
+                const char *cn = i->name;
+                /* Check if it's a known extern */
+                int is_known = 0;
+                for (int k = 0; known_extern[k]; k++)
+                    if (strcmp(cn, known_extern[k]) == 0) { is_known = 1; break; }
+                if (is_known) continue;
+                /* Check if defined in our .text */
+                for (int k = 0; k < ndef; k++)
+                    if (strcmp(cn, defined[k]) == 0) { is_known = 1; break; }
+                if (is_known) continue;
+
+                /* Emit a weak stub */
+                if (!stubs_emitted) {
+                    fprintf(f, "\t# --- runtime stubs for Kotlin builtins ---\n");
+                    fprintf(f, "\t.text\n");
+                    stubs_emitted = 1;
+                }
+                /* Check for duplicates */
+                int already = 0;
+                for (int k = 0; k < ndef; k++)
+                    if (strcmp(cn, defined[k]) == 0) { already = 1; break; }
+                if (already) continue;
+                if (ndef < 128) defined[ndef++] = cn;
+
+                fprintf(f, "\t.weak %s\n", cn);
+                fprintf(f, "\t.type %s, @function\n", cn);
+                fprintf(f, "%s:\n", cn);
+                fprintf(f, "\tpushq %%rbp\n");
+                fprintf(f, "\tmovq %%rsp, %%rbp\n");
+                fprintf(f, "\txorl %%eax, %%eax\n");
+                fprintf(f, "\tpopq %%rbp\n");
+                fprintf(f, "\tret\n");
+                fprintf(f, "\t.size %s, .-%s\n", cn, cn);
+            }
+        }
+    }
 
     /* ------------------------------------------------------------------ */
-    /* main entrypoint wrapper:
-       If the source defines 'main', it is already emitted.
-       We need _start only when not linking with gcc (we ARE using gcc,
-       so the CRT provides _start -> calls main).  Nothing extra needed. */
-
-    /* ------------------------------------------------------------------ */
-    /* .note.GNU-stack: mark stack as non-executable (silences ld warning) */
+    /* .note.GNU-stack: mark stack as non-executable */
     fprintf(f, "\t.section .note.GNU-stack,\"\",@progbits\n");
 
     fclose(f);

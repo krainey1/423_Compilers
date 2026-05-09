@@ -170,18 +170,60 @@ long assign_offsets(SymbolTable global)
     return global_size;
 }
 
-static long assign_fn_offsets(SymbolTable fn_scope)
+/* Assign offsets to params in tree declaration order (so param 0 -> offset 0,
+   param 1 -> offset 8, etc.).  Then assign remaining locals.
+   Returns (frame_size_in_bytes, nparams). */
+static int g_fn_nparams = 0;  /* set by assign_fn_offsets_ordered */
+
+static void collect_param_names(struct tree *t, const char **names, int *cnt, int max)
 {
-    if (!fn_scope) return 0;
-    long local_off = 0;
-    for (int b = 0; b < fn_scope->nBuckets; b++) {
-        for (SymbolTableEntry e = fn_scope->tbl[b]; e; e = e->next) {
-            addr_t a = addr_local(local_off);
-            sym_set_addr(e, a);
-            local_off += WORD_SIZE;
+    if (!t || *cnt >= max) return;
+    if (t->symbol && strcmp(t->symbol, "functionValueParameter") == 0) {
+        if (t->nkids >= 1 && t->kids[0] && t->kids[0]->leaf &&
+            t->kids[0]->leaf->lexeme) {
+            if (*cnt < max)
+                names[(*cnt)++] = t->kids[0]->leaf->lexeme;
+        }
+        return;
+    }
+    for (int i = 0; i < t->nkids; i++)
+        collect_param_names(t->kids[i], names, cnt, max);
+}
+
+
+
+/* Assign offsets: params first (in tree order 0,8,16,...), then locals */
+static long assign_fn_offsets_ordered(SymbolTable fn_scope,
+                                       struct tree *fn_tree)
+{
+    if (!fn_scope) { g_fn_nparams = 0; return 0; }
+
+    /* Collect param names in declaration order from the AST */
+    const char *pnames[32];
+    int np = 0;
+    if (fn_tree) collect_param_names(fn_tree, pnames, &np, 32);
+    g_fn_nparams = np;
+
+    long off = 0;
+    /* First pass: assign params in order */
+    for (int k = 0; k < np; k++) {
+        SymbolTableEntry e = lookupsym(fn_scope, pnames[k]);
+        if (e) {
+            sym_set_addr(e, addr_local(off));
+            off += WORD_SIZE;
         }
     }
-    return local_off;
+    /* Second pass: assign remaining locals (non-params) */
+    for (int b = 0; b < fn_scope->nBuckets; b++) {
+        for (SymbolTableEntry e = fn_scope->tbl[b]; e; e = e->next) {
+            /* Check if already assigned (it's a param) */
+            addr_t a = sym_get_addr(e);
+            if (a.region != R_NONE) continue;
+            sym_set_addr(e, addr_local(off));
+            off += WORD_SIZE;
+        }
+    }
+    return off;
 }
 
 /* -----------------------------------------------------------------------
@@ -332,6 +374,40 @@ static addr_t     cg_expr(struct tree *t, icode_list_t *code);
 static void       cg_stmt(struct tree *t, icode_list_t *code);
 static void       cg_bool(struct tree *t, icode_list_t *code,
                            addr_t on_true, addr_t on_false);
+
+/* -----------------------------------------------------------------------
+ * Loop-label stack for break/continue support
+ * ---------------------------------------------------------------------- */
+#define LOOP_STACK_MAX 64
+static addr_t g_loop_exit_stack[LOOP_STACK_MAX];   /* for break    */
+static addr_t g_loop_top_stack[LOOP_STACK_MAX];    /* for continue */
+static int    g_loop_depth = 0;
+
+static void loop_push(addr_t exit_label, addr_t top_label)
+{
+    if (g_loop_depth < LOOP_STACK_MAX) {
+        g_loop_exit_stack[g_loop_depth] = exit_label;
+        g_loop_top_stack[g_loop_depth]  = top_label;
+        g_loop_depth++;
+    }
+}
+
+static void loop_pop(void)
+{
+    if (g_loop_depth > 0) g_loop_depth--;
+}
+
+static addr_t loop_exit(void)
+{
+    if (g_loop_depth > 0) return g_loop_exit_stack[g_loop_depth - 1];
+    return addr_none();
+}
+
+static addr_t loop_top(void)
+{
+    if (g_loop_depth > 0) return g_loop_top_stack[g_loop_depth - 1];
+    return addr_none();
+}
 
 //boolean expression gen
 static void cg_bool(struct tree *t, icode_list_t *code,
@@ -599,20 +675,25 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
         /* Find the function's own scope */
         SymbolTable fn_scope = find_fn_scope_by_name(g_current_scope, fname);
         long frame_size = 0;
+        int  nparams    = 0;
         if (fn_scope) {
-            frame_size = assign_fn_offsets(fn_scope);
+            frame_size = assign_fn_offsets_ordered(fn_scope, t);
+            nparams    = g_fn_nparams;
         }
 
-        /* Reset temp allocator; temps live above the param/local area.
-           We start temps at frame_size and grow upward.                */
+        /* Reset temp allocator; temps live above the param/local area */
         long saved_temp = g_temp_offset;
         g_temp_offset   = frame_size;
 
         SymbolTable saved_scope = g_current_scope;
         if (fn_scope) g_current_scope = fn_scope;
 
-        /* Emit PROC pseudo-instruction */
-        icode_append(code, instr_proc(fname, 0 /* placeholder */));
+        /* Emit PROC with nparams encoded in src1 */
+        instr_t *proc_i = instr_proc(fname, nparams);
+        /* Encode nparams in src1.offset so assemble.c can read it */
+        proc_i->src1.region = R_CONST;
+        proc_i->src1.offset = (long)nparams;
+        icode_append(code, proc_i);
 
         /* Find the block kid */
         struct tree *blk = NULL;
@@ -714,14 +795,11 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
         struct tree *then_body = (t->nkids >= 5) ? t->kids[4] : NULL;
         struct tree *else_body = (t->nkids == 7) ? t->kids[6] : NULL;
 
-        cg_attrs *ca = cond ? get_attrs(cond) : NULL;
-
-        addr_t l_true  = (ca && ca->on_true_set)  ? ca->on_true
-                                                   : genlabel();
-        addr_t l_false = (ca && ca->on_false_set) ? ca->on_false
-                                                   : genlabel();
-        addr_t l_end   = get_attrs(t)->follow_set  ? get_attrs(t)->follow
-                                                   : genlabel();
+        /* Always generate fresh labels to avoid collision with
+         * pre-assigned follow/bool labels from assign_first/follow passes */
+        addr_t l_true  = genlabel();
+        addr_t l_false = genlabel();
+        addr_t l_end   = genlabel();
 
         /* Emit condition as a boolean branch */
         cg_bool(cond, code, l_true, l_false);
@@ -742,22 +820,14 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
 
     /* ---- whileStatement ----------------------------------------------- */
     if (strcmp(sym, "whileStatement") == 0) {
-        /*
-         * WHILE ( cond ) body
-         *
-         * l_top:  (loop header)
-         *   cg_bool(cond) -> jtrue l_body, jfalse l_end
-         * l_body:
-         *   cg_stmt(body)
-         *   jump l_top
-         * l_end:
-         */
         struct tree *cond = (t->nkids >= 3) ? t->kids[2] : NULL;
         struct tree *body = (t->nkids >= 5) ? t->kids[4] : NULL;
 
         addr_t l_top  = genlabel();
         addr_t l_body = genlabel();
         addr_t l_end  = genlabel();
+
+        loop_push(l_end, l_top);
 
         icode_append(code, instr_new(OP_LABEL, l_top, addr_none(), addr_none()));
         cg_bool(cond, code, l_body, l_end);
@@ -767,24 +837,13 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
         icode_append(code, instr_new(OP_JUMP, l_top, addr_none(), addr_none()));
 
         icode_append(code, instr_new(OP_LABEL, l_end, addr_none(), addr_none()));
+
+        loop_pop();
         return;
     }
 
     /* ---- forStatement ------------------------------------------------- */
     if (strcmp(sym, "forStatement") == 0) {
-        /*
-         * FOR ( IDENT IN rangeExpr ) body
-         * kids: FOR LPAREN IDENT IN rangeExpr RPAREN body
-         *
-         * We generate:
-         *   IDENT = range.start
-         * l_top:
-         *   if IDENT > range.end goto l_end
-         *   body
-         *   IDENT++
-         *   goto l_top
-         * l_end:
-         */
         const char *iname = leaf_text(t->kids[2]);
         struct tree *range = (t->nkids >= 5) ? t->kids[4] : NULL;
         struct tree *body  = (t->nkids >= 7) ? t->kids[6] : NULL;
@@ -808,9 +867,11 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
         addr_t l_top = genlabel();
         addr_t l_end = genlabel();
 
+        loop_push(l_end, l_top);
+
         icode_append(code, instr_new(OP_LABEL, l_top, addr_none(), addr_none()));
 
-        /* condition: i <= end  (or i < end for until) */
+        /* condition: i <= end  (use GT as the exit condition) */
         addr_t cmp_tmp = new_temp();
         icode_append(code, instr_new(OP_GT_INT, cmp_tmp, i_addr, end_val));
         icode_append(code, instr_new(OP_JUMP_TRUE, l_end, cmp_tmp, addr_none()));
@@ -823,17 +884,29 @@ static void cg_stmt(struct tree *t, icode_list_t *code)
 
         icode_append(code, instr_new(OP_JUMP, l_top, addr_none(), addr_none()));
         icode_append(code, instr_new(OP_LABEL, l_end, addr_none(), addr_none()));
+
+        loop_pop();
         return;
     }
 
     /* ---- jumpStatement (return / break / continue) -------------------- */
     if (strcmp(sym, "jumpStatement") == 0) {
         if (t->nkids == 1) {
-            /* RETURN or BREAK or CONTINUE */
             int kw = leaf_code(t->kids[0]);
             if (kw == RETURN)
                 icode_append(code, instr_new(OP_RETURN, addr_none(),
                                               addr_none(), addr_none()));
+            else if (kw == BREAK) {
+                addr_t exit_lbl = loop_exit();
+                if (exit_lbl.region != R_NONE)
+                    icode_append(code, instr_new(OP_JUMP, exit_lbl,
+                                                  addr_none(), addr_none()));
+            } else if (kw == CONTINUE) {
+                addr_t top_lbl = loop_top();
+                if (top_lbl.region != R_NONE)
+                    icode_append(code, instr_new(OP_JUMP, top_lbl,
+                                                  addr_none(), addr_none()));
+            }
         } else if (t->nkids == 2) {
             /* RETURN expr */
             addr_t val = cg_expr(t->kids[1], code);

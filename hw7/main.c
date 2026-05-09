@@ -28,7 +28,8 @@ int main(int argc, char **argv) {
     int tree_mode   = 0;
     int symtab_mode = 0;
     int ic_mode     = 0;   /* -ic  : also write/show .ic file */
-    int asm_only    = 0;   /* -S   : write .s but don't compile/run */
+    int asm_only    = 0;   /* -s   : write .s but don't assemble/link */
+    int obj_only    = 0;   /* -c   : assemble to .o but don't link */
     const char *source_file = NULL;
 
     /* parse arguments */
@@ -37,12 +38,14 @@ int main(int argc, char **argv) {
         else if (strcmp(argv[i], "-tree")   == 0) tree_mode   = 1;
         else if (strcmp(argv[i], "-symtab") == 0) symtab_mode = 1;
         else if (strcmp(argv[i], "-ic")     == 0) ic_mode     = 1;
-        else if (strcmp(argv[i], "-S")      == 0) asm_only    = 1;
+        else if (strcmp(argv[i], "-s")      == 0) asm_only    = 1;
+        else if (strcmp(argv[i], "-S")      == 0) asm_only    = 1;  /* alias */
+        else if (strcmp(argv[i], "-c")      == 0) obj_only    = 1;
         else                                       source_file = argv[i];
     }
 
     if (!source_file) {
-        fprintf(stderr, "usage: %s [-dot] [-tree] [-symtab] [-ic] [-S] <file.kt>\n",
+        fprintf(stderr, "usage: %s [-dot] [-tree] [-symtab] [-ic] [-s] [-c] <file.kt>\n",
                 argv[0]);
         return 1;
     }
@@ -105,8 +108,15 @@ int main(int argc, char **argv) {
         free(ic_file);
     }
 
-    // assembly gen
+    /* ------------------------------------------------------------------ */
+    /* x86-64 assembly generation                                           */
+    /* make_asm_filename preserves source directory, replaces .kt with .s  */
+    /* ------------------------------------------------------------------ */
     char *asm_file = make_asm_filename(source_file);
+
+    /* Spec: write out the name of the file to standard out when you open it */
+    printf("%s\n", asm_file);
+
     asm_gen(code, str_seg, dat_seg, asm_file);
 
     icode_free(code);
@@ -116,36 +126,70 @@ int main(int argc, char **argv) {
     freesymtabs();
     tree_free(g_root);
 
-    //run unless we pass .S
-    if (!asm_only) {
-        /* Derive executable name: strip .s extension */
-        char *exe_file = strdup(asm_file);
-        char *dot      = strrchr(exe_file, '.');
-        if (dot) *dot = '\0';
+    /* ------------------------------------------------------------------ */
+    /* Post-assembly steps based on flags                                   */
+    /* ------------------------------------------------------------------ */
 
-        // gcc -o <exe> <asm_file> -no-pie 
-        char cmd[1024];
+    /* -s : just write assembler, done */
+    if (asm_only) {
+        free(asm_file);
+        return 0;
+    }
+
+    /* Derive base name (no extension) for .o and exe */
+    char *base_name = strdup(asm_file);
+    char *dot = strrchr(base_name, '.');
+    if (dot) *dot = '\0';
+
+    char obj_file[2048];
+    snprintf(obj_file, sizeof obj_file, "%s.o", base_name);
+
+    char cmd[4096];
+    int rc;
+
+    /* -c : assemble to .o only (using cc as the spec says cc or as) */
+    if (obj_only) {
         snprintf(cmd, sizeof cmd,
-                 "gcc -o %s %s -no-pie 2>&1",
-                 exe_file, asm_file);
-
-        int rc = system(cmd);
-        if (rc != 0) {
-            fprintf(stderr, "k0: gcc failed (exit %d)\n", rc);
-            free(asm_file);
-            free(exe_file);
-            return 4;
-        }
-
-       //run the compiled program
-        snprintf(cmd, sizeof cmd, "./%s", exe_file);
+                 "gcc -c -o %s %s 2>&1",
+                 obj_file, asm_file);
         rc = system(cmd);
+        if (rc != 0) {
+            fprintf(stderr, "k0: assembler failed (exit %d)\n", rc);
+            free(asm_file);
+            free(base_name);
+            return 1;
+        }
+        free(asm_file);
+        free(base_name);
+        return 0;
+    }
 
-        free(exe_file);
-    } else {
-        printf("Assembly written to: %s\n", asm_file);
+    /* No flags: assemble to .o then link to executable */
+    /* Assemble */
+    snprintf(cmd, sizeof cmd,
+             "gcc -c -o %s %s 2>&1",
+             obj_file, asm_file);
+    rc = system(cmd);
+    if (rc != 0) {
+        fprintf(stderr, "k0: assembler failed (exit %d)\n", rc);
+        free(asm_file);
+        free(base_name);
+        return 1;
+    }
+
+    /* Link */
+    snprintf(cmd, sizeof cmd,
+             "gcc -o %s %s -no-pie 2>&1",
+             base_name, obj_file);
+    rc = system(cmd);
+    if (rc != 0) {
+        fprintf(stderr, "k0: linker failed (exit %d)\n", rc);
+        free(asm_file);
+        free(base_name);
+        return 1;
     }
 
     free(asm_file);
+    free(base_name);
     return 0;
 }
